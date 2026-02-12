@@ -13,24 +13,25 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("DaVez API")
-                        .description("Sistema de Gestão de Filas e Pátio")
-                        .contact(new Contact()
-                                .name("Seu Nome")
-                                .email("seu.email@davez.com"))
-                        .license(new License()
-                                .name("Apache 2.0")
-                                .url("http://springdoc.org")))
-                .addSecurityItem(new SecurityRequirement().addList("bearer-key"))
-                .components(new Components()
-                        .addSecuritySchemes("bearer-key",
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")));
-    }
+        @Bean
+        public OpenAPI customOpenAPI() {
+                return new OpenAPI()
+                                .info(new Info()
+                                                .title("DaVez API")
+                                                .description("Sistema de Gestão de Filas e Pátio para Agronegócio. Controla fluxo de caminhões, triagem e chamadas.")
+                                                .version("1.0.0")
+                                                .contact(new Contact()
+                                                                .name("Equipe DaVez")
+                                                                .email("tech@davez.com.br"))
+                                                .license(new License()
+                                                                .name("Apache 2.0")
+                                                                .url("http://springdoc.org")))
+                                .addSecurityItem(new SecurityRequirement().addList("bearer-key"))
+                                .components(new Components()
+                                                .addSecuritySchemes("bearer-key",
+                                                                new SecurityScheme()
+                                                                                .type(SecurityScheme.Type.HTTP)
+                                                                                .scheme("bearer")
+                                                                                .bearerFormat("JWT")));
+        }
 }

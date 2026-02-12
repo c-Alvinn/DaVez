@@ -1,5 +1,8 @@
 package br.com.davez.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import br.com.davez.api.model.dto.user.LoginRequestDTO;
 import br.com.davez.api.model.dto.user.LoginResponseDTO;
 import br.com.davez.api.service.AuthService;
@@ -20,6 +23,11 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @Operation(summary = "Realizar Login", description = "Autentica um usuário e retorna um token JWT.")
+    @SecurityRequirements()
+    @ApiResponse(responseCode = "200", description = "Login realizado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Dados inválidos")
+    @ApiResponse(responseCode = "403", description = "Credenciais inválidas")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO data) {
         return ResponseEntity.ok(authService.authenticate(data));

@@ -33,11 +33,12 @@ public class SecurityConfig {
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/user/driver/register").permitAll();
                     req.requestMatchers(
-                            "/v3/api-docs/**",       // Rota padrão (manter por segurança)
-                            "/swagger-ui/**",        // Recursos visuais (CSS, JS)
-                            "/swagger-ui.html",      // HTML legado
-                            "/docs",                 // Sua interface personalizada
-                            "/api-docs/**"           // <--- ADICIONE ESTA LINHA (Corrige o erro 403)
+                            "/v3/api-docs", // Documentação JSON
+                            "/v3/api-docs/**", // Rota padrão (manter por segurança)
+                            "/swagger-ui/**", // Recursos visuais (CSS, JS)
+                            "/swagger-ui.html", // HTML legado
+                            "/docs", // Sua interface personalizada
+                            "/api-docs/**" // <--- ADICIONE ESTA LINHA (Corrige o erro 403)
                     ).permitAll();
 
                     req.requestMatchers(HttpMethod.POST, "/user/internal/register").hasAnyRole("ADMIN", "MANAGER");
@@ -56,14 +57,18 @@ public class SecurityConfig {
                     req.requestMatchers(HttpMethod.POST, "/branchy").hasAnyRole("ADMIN", "MANAGER");
                     req.requestMatchers(HttpMethod.PUT, "/branchy/*").hasAnyRole("ADMIN", "MANAGER");
                     req.requestMatchers(HttpMethod.DELETE, "/branchy/*").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.GET, "/branchy").hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR", "GATE_KEEPER");
+                    req.requestMatchers(HttpMethod.GET, "/branchy").hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR",
+                            "GATE_KEEPER");
                     req.requestMatchers(HttpMethod.GET, "/branchy/*").authenticated();
                     req.requestMatchers(HttpMethod.GET, "/branchy/company/*").authenticated();
 
-                    req.requestMatchers(HttpMethod.POST, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER", "SCALE_OPERATOR", "GATE_KEEPER");
+                    req.requestMatchers(HttpMethod.POST, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
+                            "SCALE_OPERATOR", "GATE_KEEPER");
                     req.requestMatchers(HttpMethod.GET, "/schedules", "/schedules/*").authenticated();
-                    req.requestMatchers(HttpMethod.PATCH, "/schedules/{id}/in-service", "/schedules/{id}/completed").hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR");
-                    req.requestMatchers(HttpMethod.PATCH, "/schedules/{id}/cancel").hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR", "GATE_KEEPER", "DRIVER");
+                    req.requestMatchers(HttpMethod.PATCH, "/schedules/{id}/in-service", "/schedules/{id}/completed")
+                            .hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR");
+                    req.requestMatchers(HttpMethod.PATCH, "/schedules/{id}/cancel").hasAnyRole("ADMIN", "MANAGER",
+                            "SCALE_OPERATOR", "GATE_KEEPER", "DRIVER");
                     req.requestMatchers(HttpMethod.DELETE, "/schedules/{id}").hasRole("ADMIN");
 
                     req.anyRequest().authenticated();
