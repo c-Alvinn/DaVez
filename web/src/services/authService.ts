@@ -38,10 +38,10 @@ export const authService = {
         phone: string;
         password: string;
     }): Promise<void> {
-        await api.post('/auth/register/driver', {
+        await api.post('/user/driver/register', {
             name: data.fullName,
             cpf: data.cpf,
-            phone: data.phone,
+            phoneNumber: data.phone,
             password: data.password,
         });
     },

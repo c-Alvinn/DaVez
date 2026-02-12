@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
+import { isCPF } from 'brazilian-values';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { authService } from '../services/authService';
+import { formatCPF, formatPhone } from '../utils/masks';
 
 export default function DriverRegister() {
     const navigate = useNavigate();
@@ -14,31 +17,25 @@ export default function DriverRegister() {
         confirmPassword: ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [apiError, setApiError] = useState('');
 
-    const validateCPF = (cpf: string): boolean => {
-        const cleanCPF = cpf.replace(/\D/g, '');
-        return cleanCPF.length === 11;
-    };
-
-    const validatePhone = (phone: string): boolean => {
-        const cleanPhone = phone.replace(/\D/g, '');
-        return cleanPhone.length >= 10 && cleanPhone.length <= 11;
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrors({});
+        setApiError('');
         const newErrors: Record<string, string> = {};
 
         if (!formData.fullName.trim()) {
             newErrors.fullName = 'Nome completo é obrigatório';
         }
 
-        if (!validateCPF(formData.cpf)) {
-            newErrors.cpf = 'CPF inválido (deve conter 11 dígitos)';
+        if (!isCPF(formData.cpf)) {
+            newErrors.cpf = 'CPF inválido';
         }
 
-        if (!validatePhone(formData.phone)) {
-            newErrors.phone = 'Telefone inválido (10 ou 11 dígitos)';
+        if (formData.phone.replace(/\D/g, '').length < 10) {
+            newErrors.phone = 'Telefone inválido';
         }
 
         if (formData.password.length < 6) {
@@ -54,14 +51,30 @@ export default function DriverRegister() {
             return;
         }
 
-        // TODO: Integrar com API de cadastro
-        console.log('Cadastro realizado:', formData);
-        alert('Cadastro realizado com sucesso! (Simulação)');
-        navigate('/login?role=driver');
+        setIsLoading(true);
+        try {
+            await authService.register({
+                fullName: formData.fullName,
+                cpf: formData.cpf.replace(/\D/g, ''),
+                phone: formData.phone.replace(/\D/g, ''),
+                password: formData.password
+            });
+
+            navigate('/login?role=driver');
+        } catch (err: any) {
+            console.error('Erro no cadastro:', err);
+            setApiError(err.response?.data?.message || 'Falha ao realizar cadastro. Tente novamente.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        let formattedValue = value;
+        if (field === 'cpf') formattedValue = formatCPF(value);
+        if (field === 'phone') formattedValue = formatPhone(value);
+
+        setFormData(prev => ({ ...prev, [field]: formattedValue }));
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
@@ -83,6 +96,12 @@ export default function DriverRegister() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    {apiError && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                            {apiError}
+                        </div>
+                    )}
+
                     <Input
                         label="Nome Completo"
                         value={formData.fullName}
@@ -90,6 +109,7 @@ export default function DriverRegister() {
                         placeholder="Digite seu nome completo"
                         error={errors.fullName}
                         required
+                        disabled={isLoading}
                     />
 
                     <Input
@@ -99,6 +119,7 @@ export default function DriverRegister() {
                         placeholder="000.000.000-00"
                         error={errors.cpf}
                         required
+                        disabled={isLoading}
                     />
 
                     <Input
@@ -108,6 +129,7 @@ export default function DriverRegister() {
                         placeholder="(00) 00000-0000"
                         error={errors.phone}
                         required
+                        disabled={isLoading}
                     />
 
                     <Input
@@ -118,6 +140,7 @@ export default function DriverRegister() {
                         placeholder="Mínimo 6 caracteres"
                         error={errors.password}
                         required
+                        disabled={isLoading}
                     />
 
                     <Input
@@ -128,11 +151,18 @@ export default function DriverRegister() {
                         placeholder="Digite a senha novamente"
                         error={errors.confirmPassword}
                         required
+                        disabled={isLoading}
                     />
 
-                    <Button type="submit" className="w-full mt-4">
-                        <UserPlus size={18} className="mr-2" />
-                        Criar Conta
+                    <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+                        {isLoading ? (
+                            'Criando conta...'
+                        ) : (
+                            <>
+                                <UserPlus size={18} className="mr-2" />
+                                Criar Conta
+                            </>
+                        )}
                     </Button>
                 </form>
             </div>

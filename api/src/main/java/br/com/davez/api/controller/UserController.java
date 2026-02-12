@@ -2,8 +2,6 @@ package br.com.davez.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import br.com.davez.api.model.dto.user.RegisterCarrierUserRequestDTO;
 import br.com.davez.api.model.dto.user.RegisterDriverRequestDTO;
 import br.com.davez.api.model.dto.user.RegisterInternalUserRequestDTO;
@@ -42,7 +40,6 @@ public class UserController {
     }
 
     @Operation(summary = "Registrar Motorista", description = "Cadastra um novo motorista independente ou vinculado.")
-    @SecurityRequirements()
     @ApiResponse(responseCode = "201", description = "Motorista cadastrado com sucesso")
     @ApiResponse(responseCode = "400", description = "CPF inválido ou já cadastrado")
     @PostMapping("/driver/register")

@@ -2,7 +2,6 @@ package br.com.davez.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import br.com.davez.api.model.dto.user.LoginRequestDTO;
 import br.com.davez.api.model.dto.user.LoginResponseDTO;
 import br.com.davez.api.service.AuthService;

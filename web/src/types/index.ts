@@ -1,7 +1,11 @@
+import { Role } from './enums';
+
+export * from './enums';
+
 export type User = {
     id: number;
     name: string;
-    role: 'DRIVER' | 'CARRIER' | 'GATE_KEEPER' | 'SCALE_OPERATOR' | 'MANAGER' | 'ADMIN';
+    role: Role;
     token: string;
     companyId?: number;
     carrierId?: number;

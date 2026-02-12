@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { authService } from '../services/authService';
+import { formatCPF } from '../utils/masks';
 
 export default function Login() {
     const [searchParams] = useSearchParams();
@@ -25,9 +26,11 @@ export default function Login() {
         setError('');
         setIsLoading(true);
 
+        const cleanUsername = role === 'DRIVER' ? username.replace(/\D/g, '') : username;
+
         try {
             const user = await authService.login({
-                loginIdentifier: username,
+                loginIdentifier: cleanUsername,
                 password: password,
             });
 
@@ -42,6 +45,14 @@ export default function Login() {
             setError(err.response?.data?.message || 'Credenciais inválidas. Verifique seus dados e tente novamente.');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleUsernameChange = (value: string) => {
+        if (role === 'DRIVER') {
+            setUsername(formatCPF(value));
+        } else {
+            setUsername(value);
         }
     };
 
@@ -67,7 +78,7 @@ export default function Login() {
                         <input
                             type="text"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(e) => handleUsernameChange(e.target.value)}
                             placeholder={role === 'DRIVER' ? 'Digite seu CPF' : 'Digite seu nome de usuário'}
                             className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                             required

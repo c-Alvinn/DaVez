@@ -1,222 +1,216 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, CheckCircle, Truck, Package } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Truck, MapPin, Package, Building2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { useAuth } from '../../context/useAuth';
+import { formatPlate } from '../../utils/masks';
+import { GrainType, GrainTypeLabels, TruckType, TruckTypeLabels } from '../../types';
 
-const STEPS = [
-    { id: 1, title: 'Carga', icon: Package },
-    { id: 2, title: 'Veículo', icon: Truck },
-    { id: 3, title: 'Confirmação', icon: CheckCircle },
+// Mock data
+const COMPANIES = [
+    { id: '1', name: 'AgroSul S/A' },
+    { id: '2', name: 'Fazenda Rio Verde' },
+    { id: '3', name: 'Cooperativa Grão de Ouro' },
+];
+
+const BRANCHES: Record<string, { id: string, name: string }[]> = {
+    '1': [
+        { id: '101', name: 'Filial Matriz - Cascavel' },
+        { id: '102', name: 'Unidade de Recebimento - Toledo' },
+    ],
+    '2': [
+        { id: '201', name: 'Armazém 01 - Maringá' },
+        { id: '202', name: 'Porto Seco - Londrina' },
+    ],
+    '3': [
+        { id: '301', name: 'Silo Central' },
+    ]
+};
+
+const TRUCK_TYPES = Object.values(TruckType).map(value => ({
+    label: TruckTypeLabels[value],
+    value
+}));
+
+const GRAIN_TYPES = Object.values(GrainType).map(value => ({
+    label: GrainTypeLabels[value],
+    value
+}));
+
+const CARRIERS = [
+    { label: 'Autônomo', value: 'AUTONOMO' },
+    { label: 'TransLogística Brasil', value: 'TRANS_LOG' },
+    { label: 'Expresso Grãos', value: 'EXPRESSO_GRAO' },
+    { label: 'Rápido Rodoviário', value: 'RAPIDO_RODO' },
 ];
 
 export default function NewSchedule() {
     const navigate = useNavigate();
-    const { user } = useAuth();
-    const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
-        operationType: '',
-        grainType: '',
         companyId: '',
         branchId: '',
         licensePlate: '',
         truckType: '',
+        grainType: '',
         carrierId: '',
-        driverCpf: user?.role === 'DRIVER' ? '' : '',
     });
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleNext = () => {
-        if (currentStep < 3) setCurrentStep(c => c + 1);
+    // Reset Filial when Empresa changes
+    useEffect(() => {
+        setFormData(prev => ({ ...prev, branchId: '' }));
+    }, [formData.companyId]);
+
+    const handlePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPlate(e.target.value);
+        setFormData({ ...formData, licensePlate: formatted });
     };
 
-    const handleBack = () => {
-        if (currentStep > 1) setCurrentStep(c => c - 1);
-        else navigate('/driver');
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Enviando agendamento:', formData);
-        // TODO: Integração com API
-        alert('Agendamento realizado com sucesso! (Simulação)');
-        navigate('/driver');
+        setIsLoading(true);
+
+        // Simulação de delay de rede
+        setTimeout(() => {
+            setIsLoading(false);
+            // TODO: Integrar com API real futuramente
+            navigate('/driver/active');
+        }, 1500);
     };
+
+    const isFormValid =
+        formData.companyId &&
+        formData.branchId &&
+        formData.licensePlate.length >= 7 &&
+        formData.truckType &&
+        formData.grainType &&
+        formData.carrierId;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Header Simplificado */}
-            <header className="bg-white p-4 shadow-sm flex items-center gap-4 sticky top-0 z-10">
-                <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-full text-gray-600">
-                    <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-lg font-bold text-gray-800">Novo Agendamento</h1>
+        <div className="min-h-screen bg-gray-50 pb-10">
+            {/* Header */}
+            <header className="bg-white border-b border-gray-100 p-4 sticky top-0 z-10">
+                <div className="max-w-lg mx-auto flex items-center gap-4">
+                    <button onClick={() => navigate('/driver')} className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors">
+                        <ArrowLeft size={20} />
+                    </button>
+                    <h1 className="text-lg font-bold text-gray-800">Agendar Embarque</h1>
+                </div>
             </header>
 
-            <main className="flex-1 p-4 max-w-lg mx-auto w-full">
-                {/* Progress Bar */}
-                <div className="flex items-center justify-between mb-8 px-4">
-                    {STEPS.map((step) => {
-                        const Icon = step.icon;
-                        const isActive = step.id === currentStep;
-                        const isCompleted = step.id < currentStep;
-
-                        return (
-                            <div key={step.id} className="flex flex-col items-center gap-2 relative z-0">
-                                <div className={`
-                            w-10 h-10 rounded-full flex items-center justify-center transition-all
-                            ${isActive ? 'bg-blue-600 text-white shadow-lg scale-110' :
-                                        isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}
-                        `}>
-                                    <Icon size={18} />
-                                </div>
-                                <span className={`text-xs font-medium ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>
-                                    {step.title}
-                                </span>
-                            </div>
-                        )
-                    })}
-                    {/* Linha de progresso (visual simplified) */}
-                    <div className="absolute left-0 right-0 top-20 h-0.5 bg-gray-200 -z-10 hidden md:block" />
+            <main className="max-w-lg mx-auto p-4 space-y-6 mt-4">
+                {/* Hero Card Visual */}
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 text-white shadow-xl shadow-blue-100 relative overflow-hidden">
+                    <div className="relative z-10">
+                        <h2 className="text-xl font-black mb-1">Novo Agendamento</h2>
+                        <p className="text-blue-100 text-sm">Preencha os dados abaixo para entrar na fila.</p>
+                    </div>
+                    <Truck className="absolute -right-6 -bottom-6 opacity-20 rotate-12" size={140} />
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-
-                    {/* STEP 1: Carga */}
-                    {currentStep === 1 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                            <div className="space-y-4">
-                                <label className="text-sm font-medium text-gray-700 block">Tipo de Operação</label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, operationType: 'LOADING' })}
-                                        className={`p-4 rounded-lg border-2 text-center transition-all ${formData.operationType === 'LOADING'
-                                            ? 'border-blue-600 bg-blue-50 text-blue-700 font-bold'
-                                            : 'border-gray-100 hover:border-blue-200 text-gray-600'
-                                            }`}
-                                    >
-                                        Carregamento
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, operationType: 'UNLOADING' })}
-                                        className={`p-4 rounded-lg border-2 text-center transition-all ${formData.operationType === 'UNLOADING'
-                                            ? 'border-blue-600 bg-blue-50 text-blue-700 font-bold'
-                                            : 'border-gray-100 hover:border-blue-200 text-gray-600'
-                                            }`}
-                                    >
-                                        Descarregamento
-                                    </button>
-                                </div>
+                <form onSubmit={handleSubmit} className="space-y-5 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                                <Building2 size={16} />
                             </div>
-
-                            <Select
-                                label="Empresa / Filial"
-                                value={formData.branchId}
-                                onChange={e => setFormData({ ...formData, branchId: e.target.value })}
-                                options={[
-                                    { label: 'AgroSul - Filial Matriz', value: '1' },
-                                    { label: 'AgroSul - Porto', value: '2' },
-                                ]} // Mock
-                            />
-
-                            <Select
-                                label="Tipo de Grão"
-                                value={formData.grainType}
-                                onChange={e => setFormData({ ...formData, grainType: e.target.value })}
-                                options={[
-                                    { label: 'Soja', value: 'SOJA' },
-                                    { label: 'Milho', value: 'MILHO' },
-                                    { label: 'Trigo', value: 'TRIGO' },
-                                ]} // Mock
-                            />
+                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider">Localidade</h3>
                         </div>
-                    )}
 
-                    {/* STEP 2: Veículo */}
-                    {currentStep === 2 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                            <Input
-                                label="Placa do Veículo"
-                                placeholder="ABC-1234"
-                                value={formData.licensePlate}
-                                onChange={e => setFormData({ ...formData, licensePlate: e.target.value.toUpperCase() })}
-                                maxLength={8}
-                            />
+                        <Select
+                            label="Empresa"
+                            value={formData.companyId}
+                            onChange={e => setFormData({ ...formData, companyId: e.target.value })}
+                            options={COMPANIES.map(c => ({ label: c.name, value: c.id }))}
+                            placeholder="Selecione a empresa"
+                        />
 
-                            <Select
-                                label="Tipo de Caminhão"
-                                value={formData.truckType}
-                                onChange={e => setFormData({ ...formData, truckType: e.target.value })}
-                                options={[
-                                    { label: 'Truck', value: 'TRUCK' },
-                                    { label: 'Bitrem', value: 'BITREN' },
-                                    { label: 'Rodotrem', value: 'RODOTREM' },
-                                    { label: 'Carreta LS', value: 'CARRETA_LS' },
-                                ]}
-                            />
-
-                            <Select
-                                label="Transportadora"
-                                value={formData.carrierId}
-                                onChange={e => setFormData({ ...formData, carrierId: e.target.value })}
-                                options={[
-                                    { label: 'TransLogística A', value: '10' },
-                                    { label: 'Rápido Grãos', value: '11' },
-                                    { label: 'Autônomo', value: '0' },
-                                ]}
-                            />
-                        </div>
-                    )}
-
-                    {/* STEP 3: Confirmação */}
-                    {currentStep === 3 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-center">
-                            <div className="bg-gray-50 p-6 rounded-lg text-left space-y-3">
-                                <h3 className="font-bold text-gray-800 border-b border-gray-200 pb-2">Resumo do Agendamento</h3>
-
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Operação</span>
-                                    <span className="font-medium text-gray-900">{formData.operationType === 'LOADING' ? 'Carregamento' : 'Descarregamento'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Grão</span>
-                                    <span className="font-medium text-gray-900">{formData.grainType}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Placa</span>
-                                    <span className="font-medium text-gray-900">{formData.licensePlate}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Veículo</span>
-                                    <span className="font-medium text-gray-900">{formData.truckType}</span>
-                                </div>
-                            </div>
-
-                            <p className="text-sm text-gray-500">
-                                Ao confirmar, você entrará na fila virtual da filial selecionada.
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Footer Buttons */}
-                    <div className="pt-4 flex gap-3">
-                        {currentStep < 3 ? (
-                            <Button type="button" onClick={handleNext} className="w-full" disabled={
-                                (currentStep === 1 && (!formData.operationType || !formData.branchId || !formData.grainType)) ||
-                                (currentStep === 2 && (!formData.licensePlate || !formData.truckType || !formData.carrierId))
-                            }>
-                                Continuar <ChevronRight size={16} className="ml-2" />
-                            </Button>
-                        ) : (
-                            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                                Confirmar Agendamento <CheckCircle size={16} className="ml-2" />
-                            </Button>
-                        )}
+                        <Select
+                            label="Filial"
+                            value={formData.branchId}
+                            onChange={e => setFormData({ ...formData, branchId: e.target.value })}
+                            options={formData.companyId ? (BRANCHES[formData.companyId] || []).map(b => ({ label: b.name, value: b.id })) : []}
+                            disabled={!formData.companyId}
+                            placeholder={formData.companyId ? "Selecione a filial" : "Selecione uma empresa primeiro"}
+                        />
                     </div>
+
+                    <div className="h-px bg-gray-50 my-6" />
+
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                                <Truck size={16} />
+                            </div>
+                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider">Veículo</h3>
+                        </div>
+
+                        <Input
+                            label="Placa do Caminhão"
+                            placeholder="ABC-1234 ou ABC-1D23"
+                            value={formData.licensePlate}
+                            onChange={handlePlateChange}
+                            maxLength={8}
+                        />
+
+                        <Select
+                            label="Tipo de Caminhão"
+                            value={formData.truckType}
+                            onChange={e => setFormData({ ...formData, truckType: e.target.value })}
+                            options={TRUCK_TYPES}
+                            placeholder="Selecione o tipo"
+                        />
+                    </div>
+
+                    <div className="h-px bg-gray-50 my-6" />
+
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                                <Package size={16} />
+                            </div>
+                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider">Carga</h3>
+                        </div>
+
+                        <Select
+                            label="Tipo de Grão"
+                            value={formData.grainType}
+                            onChange={e => setFormData({ ...formData, grainType: e.target.value })}
+                            options={GRAIN_TYPES}
+                            placeholder="Selecione o grão"
+                        />
+
+                        <Select
+                            label="Transportadora"
+                            value={formData.carrierId}
+                            onChange={e => setFormData({ ...formData, carrierId: e.target.value })}
+                            options={CARRIERS}
+                            placeholder="Selecione a transportadora"
+                        />
+                    </div>
+
+                    <Button
+                        type="submit"
+                        className="w-full mt-6 py-4 rounded-2xl shadow-lg shadow-blue-50 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200"
+                        disabled={!isFormValid || isLoading}
+                    >
+                        {isLoading ? (
+                            <span className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Processando...
+                            </span>
+                        ) : (
+                            <span className="flex items-center gap-2 font-bold uppercase tracking-widest text-xs">
+                                Confirmar Agendamento <CheckCircle size={18} />
+                            </span>
+                        )}
+                    </Button>
                 </form>
+
+                <p className="text-center text-xs text-gray-400 px-6">
+                    Ao confirmar, você está ciente de que deve respeitar o horário e as normas de segurança da unidade.
+                </p>
             </main>
         </div>
     );

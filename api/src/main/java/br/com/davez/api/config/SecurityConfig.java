@@ -40,7 +40,8 @@ public class SecurityConfig {
                     // Endpoints públicos
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/user/driver/register").permitAll();
-                    req.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
+                    req.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**")
+                            .permitAll();
 
                     // Endpoints de Agendamento
                     req.requestMatchers(HttpMethod.GET, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
