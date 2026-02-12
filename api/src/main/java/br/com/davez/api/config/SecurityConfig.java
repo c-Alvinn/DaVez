@@ -14,6 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -27,50 +33,51 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
+                    // Endpoints públicos
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/user/driver/register").permitAll();
-                    req.requestMatchers(
-                            "/v3/api-docs", // Documentação JSON
-                            "/v3/api-docs/**", // Rota padrão (manter por segurança)
-                            "/swagger-ui/**", // Recursos visuais (CSS, JS)
-                            "/swagger-ui.html", // HTML legado
-                            "/docs", // Sua interface personalizada
-                            "/api-docs/**" // <--- ADICIONE ESTA LINHA (Corrige o erro 403)
-                    ).permitAll();
+                    req.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
 
-                    req.requestMatchers(HttpMethod.POST, "/user/internal/register").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.POST, "/user/carrier/register").hasAnyRole("ADMIN", "CARRIER");
-
-                    req.requestMatchers(HttpMethod.POST, "/carrier").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.DELETE, "/carrier/*").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.PUT, "/carrier/*").hasAnyRole("ADMIN", "CARRIER");
-                    req.requestMatchers(HttpMethod.GET, "/carrier", "/carrier/*").authenticated();
-
-                    req.requestMatchers(HttpMethod.POST, "/company").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.DELETE, "/company/*").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.PUT, "/company/*").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.GET, "/company", "/companies/*").authenticated();
-
-                    req.requestMatchers(HttpMethod.POST, "/branchy").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.PUT, "/branchy/*").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.DELETE, "/branchy/*").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.GET, "/branchy").hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR",
-                            "GATE_KEEPER");
-                    req.requestMatchers(HttpMethod.GET, "/branchy/*").authenticated();
-                    req.requestMatchers(HttpMethod.GET, "/branchy/company/*").authenticated();
-
-                    req.requestMatchers(HttpMethod.POST, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
+                    // Endpoints de Agendamento
+                    req.requestMatchers(HttpMethod.GET, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
                             "SCALE_OPERATOR", "GATE_KEEPER");
-                    req.requestMatchers(HttpMethod.GET, "/schedules", "/schedules/*").authenticated();
-                    req.requestMatchers(HttpMethod.PATCH, "/schedules/{id}/in-service", "/schedules/{id}/completed")
-                            .hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR");
-                    req.requestMatchers(HttpMethod.PATCH, "/schedules/{id}/cancel").hasAnyRole("ADMIN", "MANAGER",
+                    req.requestMatchers(HttpMethod.POST, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
                             "SCALE_OPERATOR", "GATE_KEEPER", "DRIVER");
-                    req.requestMatchers(HttpMethod.DELETE, "/schedules/{id}").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/schedules/**").hasAnyRole("ADMIN", "MANAGER",
+                            "SCALE_OPERATOR", "GATE_KEEPER");
+                    req.requestMatchers(HttpMethod.DELETE, "/schedules/**").hasAnyRole("ADMIN", "MANAGER");
 
+                    // Endpoints de Usuário
+                    req.requestMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN", "MANAGER");
+                    req.requestMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN", "MANAGER");
+                    req.requestMatchers(HttpMethod.PUT, "/users/**").hasAnyRole("ADMIN", "MANAGER");
+                    req.requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN");
+
+                    // Endpoints de Empresa
+                    req.requestMatchers(HttpMethod.GET, "/companies").hasAnyRole("ADMIN", "MANAGER");
+                    req.requestMatchers(HttpMethod.POST, "/companies").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/companies/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.DELETE, "/companies/**").hasRole("ADMIN");
+
+                    // Endpoints de Transportadora
+                    req.requestMatchers(HttpMethod.GET, "/carriers").hasAnyRole("ADMIN", "MANAGER", "CARRIER");
+                    req.requestMatchers(HttpMethod.POST, "/carriers").hasAnyRole("ADMIN", "MANAGER");
+                    req.requestMatchers(HttpMethod.PUT, "/carriers/**").hasAnyRole("ADMIN", "MANAGER", "CARRIER");
+                    req.requestMatchers(HttpMethod.DELETE, "/carriers/**").hasRole("ADMIN");
+
+                    // Endpoints de Filial
+                    req.requestMatchers(HttpMethod.GET, "/branches").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
+                            "SCALE_OPERATOR", "GATE_KEEPER");
+                    req.requestMatchers(HttpMethod.POST, "/branches").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PUT, "/branches/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.DELETE, "/branches/**").hasRole("ADMIN");
+
+                    // Qualquer outra requisição precisa estar autenticada
                     req.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
@@ -85,5 +92,20 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

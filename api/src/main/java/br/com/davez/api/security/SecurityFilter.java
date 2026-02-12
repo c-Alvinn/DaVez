@@ -26,7 +26,18 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        // Pular autenticação para endpoints públicos
+        String requestPath = request.getRequestURI();
+        if (requestPath.equals("/auth/login") ||
+                requestPath.equals("/user/driver/register") ||
+                requestPath.startsWith("/swagger-ui") ||
+                requestPath.startsWith("/v3/api-docs")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String tokenJWT = recoverToken(request);
 

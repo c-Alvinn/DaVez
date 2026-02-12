@@ -24,7 +24,6 @@ public class AuthController {
     }
 
     @Operation(summary = "Realizar Login", description = "Autentica um usuário e retorna um token JWT.")
-    @SecurityRequirements()
     @ApiResponse(responseCode = "200", description = "Login realizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos")
     @ApiResponse(responseCode = "403", description = "Credenciais inválidas")
