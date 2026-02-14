@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { isCPF } from 'brazilian-values';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { authService } from '../services/authService';
-import { formatCPF, formatPhone } from '../utils/masks';
+import { Button } from '../../../components/ui/Button';
+import { Input } from '../../../components/ui/Input';
+import { authService } from '../../../services/authService';
+import { formatCPF, formatPhone } from '../../../utils/masks';
 
 export default function DriverRegister() {
     const navigate = useNavigate();

@@ -1,3 +1,29 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import './styles/design-system.css';
+
+/* Custom Scrollbar Premium */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-background-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-forest);
+    border-radius: 10px;
+    border: 2px solid var(--color-background-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+    cursor: pointer;
+}
+
+/* Firefox Support */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-background-dark);
+}

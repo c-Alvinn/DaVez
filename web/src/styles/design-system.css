@@ -1,0 +1,28 @@
+@theme {
+    /* Paleta de Cores Agro Premium - DaVez */
+    --color-primary: #13ec6d;
+    --color-background-light: #f6f8f7;
+    --color-background-dark: #102218;
+    --color-forest: #1b4332;
+    --color-emerald: #2d6a4f;
+    --color-lime-accent: #95d5b2;
+
+    /* Cores de Status */
+    --color-status-info: #2196F3;
+    --color-status-success: #4CAF50;
+    --color-status-warning: #FFC107;
+    --color-status-danger: #E63946;
+
+    /* Fontes */
+    --font-display: "Inter", sans-serif;
+}
+
+/* Mantendo :root para compatibilidade com estilos legados que não usam Tailwind se necessário */
+:root {
+    --color-primary: #13ec6d;
+    --color-background-light: #f6f8f7;
+    --color-background-dark: #102218;
+    --color-forest: #1b4332;
+    --color-emerald: #2d6a4f;
+    --color-lime-accent: #95d5b2;
+}

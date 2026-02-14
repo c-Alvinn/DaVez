@@ -1,0 +1,36 @@
+/* Landing Page Premium Styles - Based on Inspiration */
+
+.glass-effect {
+    backdrop-filter: blur(12px);
+    background-color: rgba(16, 34, 24, 0.8);
+}
+
+.hero-overlay {
+    background: linear-gradient(to right, rgba(16, 34, 24, 0.95) 30%, rgba(16, 34, 24, 0.4) 100%);
+}
+
+.accent-glow {
+    box-shadow: 0 0 20px rgba(19, 236, 109, 0.3);
+}
+
+/* Animations from code.html */
+@keyframes ping {
+
+    75%,
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+.animate-ping {
+    animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}

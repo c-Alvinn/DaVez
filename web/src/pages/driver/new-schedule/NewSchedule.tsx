@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Truck, MapPin, Package, Building2 } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Select } from '../../components/ui/Select';
-import { formatPlate } from '../../utils/masks';
-import { GrainType, GrainTypeLabels, TruckType, TruckTypeLabels } from '../../types';
+import { Button } from '../../../components/ui/Button';
+import { Input } from '../../../components/ui/Input';
+import { Select } from '../../../components/ui/Select';
+import { formatPlate } from '../../../utils/masks';
+import { GrainType, GrainTypeLabels, TruckType, TruckTypeLabels } from '../../../types';
 
 // Mock data
 const COMPANIES = [

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/useAuth';
+import { useAuth } from '../../../context/useAuth';
 import { BadgeCheck, Clock, XCircle, Search, PlayCircle, LogOut } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 
 // Mock Data

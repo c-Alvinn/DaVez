@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Save } from 'lucide-react';
-import { useAuth } from '../../context/useAuth';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { useAuth } from '../../../context/useAuth';
+import { Button } from '../../../components/ui/Button';
+import { Input } from '../../../components/ui/Input';
 
 export default function EditProfile() {
     const { user } = useAuth();

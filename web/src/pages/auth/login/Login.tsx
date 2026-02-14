@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/useAuth';
-import { authService } from '../services/authService';
-import { formatCPF } from '../utils/masks';
+import { useAuth } from '../../../context/useAuth';
+import { authService } from '../../../services/authService';
+import { formatCPF } from '../../../utils/masks';
 
 export default function Login() {
     const [searchParams] = useSearchParams();

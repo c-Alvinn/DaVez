@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import DriverRegister from './pages/DriverRegister';
-import DriverDashboard from './pages/driver/DriverDashboard';
-import NewSchedule from './pages/driver/NewSchedule';
-import ActiveAppointment from './pages/driver/ActiveAppointment';
-import AppointmentHistory from './pages/driver/AppointmentHistory';
-import Profile from './pages/driver/Profile';
-import EditProfile from './pages/driver/EditProfile';
-import OperatorDashboard from './pages/internal/OperatorDashboard';
+import Landing from './pages/landing/Landing';
+import Login from './pages/auth/login/Login';
+import DriverRegister from './pages/driver/register/DriverRegister';
+import DriverDashboard from './pages/driver/dashboard/DriverDashboard';
+import NewSchedule from './pages/driver/new-schedule/NewSchedule';
+import ActiveAppointment from './pages/driver/active-appointment/ActiveAppointment';
+import AppointmentHistory from './pages/driver/history/AppointmentHistory';
+import Profile from './pages/driver/profile/Profile';
+import EditProfile from './pages/driver/profile-edit/EditProfile';
+import OperatorDashboard from './pages/operator/dashboard/OperatorDashboard';
 
 function App() {
   return (
