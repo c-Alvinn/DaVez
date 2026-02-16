@@ -1,20 +1,12 @@
 import './Landing.css';
-
-// Layout Components
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
-
-// Common Components
-import Button from '../../components/common/Button';
-
-// Specialized Components
-import ServiceCard from '../../components/landing/ServiceCard';
-
-// Assets
-import lp1 from '../../assets/lp-1.png';
-import lp1Mobile from '../../assets/lp-1-mobile.png';
-import lp2 from '../../assets/lp-2.png';
-import lp2Mobile from '../../assets/lp-2-mobile.png';
+import Header from '../../../components/layout/Header';
+import Footer from '../../../components/layout/Footer';
+import Button from '../../../components/common/Button';
+import ServiceCard from '../../../components/landing/ServiceCard';
+import lp1 from '../../../assets/lp-1.png';
+import lp1Mobile from '../../../assets/lp-1-mobile.png';
+import lp2 from '../../../assets/lp-2.png';
+import lp2Mobile from '../../../assets/lp-2-mobile.png';
 
 export default function Landing() {
     return (

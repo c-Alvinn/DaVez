@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Logo from '../common/Logo';
 import Button from '../common/Button';
 
@@ -26,19 +27,21 @@ export default function Footer() {
                     <div className="col-span-1">
                         <h4 className="text-white font-bold mb-6 uppercase text-sm tracking-widest">Navegação</h4>
                         <ul className="space-y-4 list-none p-0">
-                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#inicio">Início</a></li>
-                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#sobre">Sobre Nós</a></li>
-                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#servicos">Serviços</a></li>
-                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#seguranca">Segurança</a></li>
+                            <li><Link className="text-slate-400 hover:text-primary transition-colors no-underline" to="/">Início</Link></li>
+                            <li><Link className="text-slate-400 hover:text-primary transition-colors no-underline" to="/sobre">Sobre Nós</Link></li>
+                            <li><Link className="text-slate-400 hover:text-primary transition-colors no-underline" to="/servicos">Serviços</Link></li>
+                            <li><Link className="text-slate-400 hover:text-primary transition-colors no-underline" to="/login?role=driver">Área do Motorista</Link></li>
+                            <li><Link className="text-slate-400 hover:text-primary transition-colors no-underline" to="/login?role=carrier">Área da Transportadora</Link></li>
+                            <li><Link className="text-slate-400 hover:text-primary transition-colors no-underline" to="/login?role=internal">Área do Armazém</Link></li>
                         </ul>
                     </div>
                     <div className="col-span-1">
                         <h4 className="text-white font-bold mb-6 uppercase text-sm tracking-widest">Suporte</h4>
                         <ul className="space-y-4 list-none p-0">
                             <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#ajuda">Central de Ajuda</a></li>
-                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#contato">Contato</a></li>
-                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#privacidade">Privacidade</a></li>
-                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="#faq">FAQ</a></li>
+                            <li><Link className="text-slate-400 hover:text-primary transition-colors no-underline" to="/contato">Contato</Link></li>
+                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="/#privacidade">Privacidade</a></li>
+                            <li><a className="text-slate-400 hover:text-primary transition-colors no-underline" href="/#faq">FAQ</a></li>
                         </ul>
                     </div>
                     <div className="col-span-1 lg:col-span-1">

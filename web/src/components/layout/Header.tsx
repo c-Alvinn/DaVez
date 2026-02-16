@@ -1,20 +1,94 @@
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '../common/Logo';
 
 export default function Header() {
+    const location = useLocation();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+        setIsMenuOpen(false);
+    }, [location]);
+
+    const isActive = (path: string) => {
+        return location.pathname === path;
+    };
+
+    const linkClass = (path: string) => {
+        return `text-sm font-medium transition-colors no-underline ${isActive(path) ? 'text-primary' : 'text-white hover:text-primary'
+            }`;
+    };
+
+    const mobileLinkClass = (path: string) => {
+        return `text-lg font-semibold py-4 border-b border-white/5 no-underline transition-colors ${isActive(path) ? 'text-primary' : 'text-white'
+            }`;
+    };
+
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-white/10">
-            <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                <Logo />
-                <div className="hidden md:flex items-center gap-8 text-white">
-                    <a className="text-sm font-medium hover:text-primary transition-colors no-underline" href="#inicio">Início</a>
-                    <a className="text-sm font-medium hover:text-primary transition-colors no-underline" href="#sobre">Sobre</a>
-                    <a className="text-sm font-medium hover:text-primary transition-colors no-underline" href="#servicos">Serviços</a>
-                    <a className="text-sm font-medium hover:text-primary transition-colors no-underline" href="#faq">FAQ</a>
+        <>
+            <header className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-white/10">
+                <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <Logo />
+
+                    {/* Desktop Menu */}
+                    <div className="hidden md:flex items-center gap-8">
+                        <Link className={linkClass('/')} to="/">Início</Link>
+                        <Link className={linkClass('/sobre')} to="/sobre">Sobre</Link>
+                        <Link className={linkClass('/servicos')} to="/servicos">Serviços</Link>
+                        <Link className={linkClass('/contato')} to="/contato">Contato</Link>
+                    </div>
+
+                    {/* Action / Spacer Desktop */}
+                    <div className="hidden md:flex w-[180px] justify-end">
+                        <Link to="/login" className="bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary/20 transition-all cursor-pointer">
+                            Área do Cliente
+                        </Link>
+                    </div>
+
+                    {/* Mobile Toggle */}
+                    <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="md:hidden text-white p-2 cursor-pointer focus:outline-none"
+                        aria-label="Toggle menu"
+                    >
+                        <span className="material-icons text-3xl">
+                            {isMenuOpen ? 'close' : 'menu'}
+                        </span>
+                    </button>
+                </nav>
+            </header>
+
+            {/* Mobile Menu Backdrop */}
+            <div
+                className={`
+                    fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity duration-300
+                    ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                `}
+                onClick={() => setIsMenuOpen(false)}
+            />
+
+            {/* Mobile Menu Drawer - Abre abaixo do header e não ocupa a tela inteira */}
+            <div
+                className={`
+                    fixed top-20 right-0 bottom-0 z-50 w-4/5 max-w-[300px] bg-[#102218] border-l border-white/10 md:hidden transition-transform duration-300 ease-in-out shadow-2xl
+                    ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+                `}
+            >
+                <div className="flex flex-col p-8 gap-2">
+                    <Link className={mobileLinkClass('/')} to="/">Início</Link>
+                    <Link className={mobileLinkClass('/sobre')} to="/sobre">Sobre</Link>
+                    <Link className={mobileLinkClass('/servicos')} to="/servicos">Serviços</Link>
+                    <Link className={mobileLinkClass('/contato')} to="/contato">Contato</Link>
+                    <div className="mt-8">
+                        <Link
+                            to="/login"
+                            className="flex items-center justify-center w-full bg-primary text-background-dark py-4 rounded-xl font-bold text-lg cursor-pointer hover:bg-primary/90 transition-all"
+                        >
+                            Acessar Sistema
+                        </Link>
+                    </div>
                 </div>
-                <div className="w-[180px] hidden md:block">
-                    {/* Espaçador para manter o logo centralizado ou equilibrar o layout */}
-                </div>
-            </nav>
-        </header>
+            </div>
+        </>
     );
 }

@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Landing from './pages/landing/Landing';
+import Landing from './pages/landing/Landing/Landing';
+import AboutUs from './pages/landing/AboutUs/AboutUs';
+import Services from './pages/landing/Services/Services';
+import Contact from './pages/landing/Contact/Contact';
 import Login from './pages/auth/login/Login';
 import DriverRegister from './pages/driver/register/DriverRegister';
 import DriverDashboard from './pages/driver/dashboard/DriverDashboard';
@@ -15,6 +18,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/sobre" element={<AboutUs />} />
+        <Route path="/servicos" element={<Services />} />
+        <Route path="/contato" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register/driver" element={<DriverRegister />} />
 

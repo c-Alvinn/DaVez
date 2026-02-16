@@ -9,6 +9,7 @@ interface ButtonProps {
     className?: string;
     icon?: string;
     type?: 'button' | 'submit' | 'reset';
+    disabled?: boolean;
 }
 
 export default function Button({
@@ -18,9 +19,10 @@ export default function Button({
     onClick,
     className = '',
     icon,
-    type = 'button'
+    type = 'button',
+    disabled = false
 }: ButtonProps) {
-    const baseStyles = "transition-all duration-300 ease-out flex items-center justify-center gap-3 font-bold no-underline active:scale-95 accent-glow";
+    const baseStyles = "transition-all duration-300 ease-out flex items-center justify-center gap-3 font-bold no-underline active:scale-95 accent-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 
     const variants = {
         primary: "bg-primary text-background-dark px-8 py-4 rounded-xl text-lg hover:bg-primary/90 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/40",
@@ -45,7 +47,12 @@ export default function Button({
     }
 
     return (
-        <button type={type} onClick={onClick} className={`${baseStyles} ${variants[variant]} ${className}`}>
+        <button
+            type={type}
+            onClick={onClick}
+            className={`${baseStyles} ${variants[variant]} ${className}`}
+            disabled={disabled}
+        >
             {content}
         </button>
     );

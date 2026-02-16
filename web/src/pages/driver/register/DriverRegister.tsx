@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, UserPlus } from 'lucide-react';
 import { isCPF } from 'brazilian-values';
-import { Button } from '../../../components/ui/Button';
-import { Input } from '../../../components/ui/Input';
+import Button from '../../../components/common/Button';
+import Logo from '../../../components/common/Logo';
 import { authService } from '../../../services/authService';
 import { formatCPF, formatPhone } from '../../../utils/masks';
+import '../../auth/login/Login.css';
 
 export default function DriverRegister() {
     const navigate = useNavigate();
@@ -81,90 +81,135 @@ export default function DriverRegister() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-full max-w-md">
-                <div className="mb-8">
-                    <button
-                        onClick={() => navigate('/login?role=driver')}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
-                    >
-                        <ArrowLeft size={20} />
-                        Voltar
-                    </button>
-                    <h1 className="text-2xl font-bold text-gray-900">Cadastro de Motorista</h1>
-                    <p className="text-gray-500 mt-2">Preencha seus dados para criar sua conta</p>
+        <div className="login-container relative flex flex-col items-center justify-center min-h-screen px-4 py-12 overflow-hidden">
+            {/* Ambient Glows */}
+            <div className="login-glow top-0 right-0 translate-x-1/2 -translate-y-1/2"></div>
+            <div className="login-glow bottom-0 left-0 -translate-x-1/2 translate-y-1/2"></div>
+
+            <div className="login-card relative z-10 p-8 md:p-10 rounded-2xl w-full max-w-[500px]">
+                <div className="mb-10 text-center">
+                    <div className="flex justify-center mb-6">
+                        <Logo size="lg" />
+                    </div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Crie sua conta</h1>
+                    <p className="text-slate-400 mt-2">Dados para acesso como Motorista</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     {apiError && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm text-center">
                             {apiError}
                         </div>
                     )}
 
-                    <Input
-                        label="Nome Completo"
-                        value={formData.fullName}
-                        onChange={(e) => handleChange('fullName', e.target.value)}
-                        placeholder="Digite seu nome completo"
-                        error={errors.fullName}
-                        required
-                        disabled={isLoading}
-                    />
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-300 ml-1">Nome Completo</label>
+                        <input
+                            type="text"
+                            value={formData.fullName}
+                            onChange={(e) => handleChange('fullName', e.target.value)}
+                            placeholder="Seu nome completo"
+                            className={`w-full p-4 login-input rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all ${errors.fullName ? 'border-red-500/50' : ''}`}
+                            required
+                            disabled={isLoading}
+                        />
+                        {errors.fullName && <span className="text-xs text-red-400 ml-1">{errors.fullName}</span>}
+                    </div>
 
-                    <Input
-                        label="CPF"
-                        value={formData.cpf}
-                        onChange={(e) => handleChange('cpf', e.target.value)}
-                        placeholder="000.000.000-00"
-                        error={errors.cpf}
-                        required
-                        disabled={isLoading}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-slate-300 ml-1">CPF</label>
+                            <input
+                                type="text"
+                                value={formData.cpf}
+                                onChange={(e) => handleChange('cpf', e.target.value)}
+                                placeholder="000.000.000-00"
+                                className={`w-full p-4 login-input rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all ${errors.cpf ? 'border-red-500/50' : ''}`}
+                                required
+                                disabled={isLoading}
+                            />
+                            {errors.cpf && <span className="text-xs text-red-400 ml-1">{errors.cpf}</span>}
+                        </div>
 
-                    <Input
-                        label="Telefone"
-                        value={formData.phone}
-                        onChange={(e) => handleChange('phone', e.target.value)}
-                        placeholder="(00) 00000-0000"
-                        error={errors.phone}
-                        required
-                        disabled={isLoading}
-                    />
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-slate-300 ml-1">Telefone</label>
+                            <input
+                                type="text"
+                                value={formData.phone}
+                                onChange={(e) => handleChange('phone', e.target.value)}
+                                placeholder="(00) 00000-0000"
+                                className={`w-full p-4 login-input rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all ${errors.phone ? 'border-red-500/50' : ''}`}
+                                required
+                                disabled={isLoading}
+                            />
+                            {errors.phone && <span className="text-xs text-red-400 ml-1">{errors.phone}</span>}
+                        </div>
+                    </div>
 
-                    <Input
-                        label="Senha"
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => handleChange('password', e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        error={errors.password}
-                        required
-                        disabled={isLoading}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-slate-300 ml-1">Senha</label>
+                            <input
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => handleChange('password', e.target.value)}
+                                placeholder="••••••••"
+                                className={`w-full p-4 login-input rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all ${errors.password ? 'border-red-500/50' : ''}`}
+                                required
+                                disabled={isLoading}
+                            />
+                            {errors.password && <span className="text-xs text-red-400 ml-1">{errors.password}</span>}
+                        </div>
 
-                    <Input
-                        label="Confirmar Senha"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                        placeholder="Digite a senha novamente"
-                        error={errors.confirmPassword}
-                        required
-                        disabled={isLoading}
-                    />
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-medium text-slate-300 ml-1">Confirmar Senha</label>
+                            <input
+                                type="password"
+                                value={formData.confirmPassword}
+                                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                                placeholder="••••••••"
+                                className={`w-full p-4 login-input rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all ${errors.confirmPassword ? 'border-red-500/50' : ''}`}
+                                required
+                                disabled={isLoading}
+                            />
+                            {errors.confirmPassword && <span className="text-xs text-red-400 ml-1">{errors.confirmPassword}</span>}
+                        </div>
+                    </div>
 
-                    <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        className="cursor-pointer w-full py-4 text-background-dark font-bold rounded-xl mt-4"
+                        disabled={isLoading}
+                    >
                         {isLoading ? (
-                            'Criando conta...'
-                        ) : (
-                            <>
-                                <UserPlus size={18} className="mr-2" />
-                                Criar Conta
-                            </>
-                        )}
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="w-4 h-4 border-2 border-background-dark/30 border-t-background-dark rounded-full animate-spin"></div>
+                                <span>Cadastrando...</span>
+                            </div>
+                        ) : 'Finalizar Cadastro'}
                     </Button>
                 </form>
+
+                <div className="mt-8 flex flex-col gap-4">
+                    <div className="text-center">
+                        <span className="text-sm text-slate-500">Já possui uma conta? </span>
+                        <button
+                            onClick={() => navigate('/login?role=driver')}
+                            className="cursor-pointer text-sm text-primary font-bold hover:underline"
+                        >
+                            Fazer Login
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={() => navigate('/')}
+                        className="cursor-pointer text-sm text-slate-500 hover:text-white transition-colors flex items-center justify-center gap-1"
+                    >
+                        <span className="material-icons text-base">arrow_back</span>
+                        Voltar ao início
+                    </button>
+                </div>
             </div>
         </div>
     );
