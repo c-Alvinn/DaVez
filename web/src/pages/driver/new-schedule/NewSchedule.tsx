@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, Truck, MapPin, Package, Building2 } from 'lucide-react';
-import { Button } from '../../../components/ui/Button';
-import { Input } from '../../../components/ui/Input';
-import { Select } from '../../../components/ui/Select';
+import { Truck, ArrowRight } from 'lucide-react';
+import DriverHeader from '../../../components/layout/DriverHeader';
+import DriverFooter from '../../../components/layout/DriverFooter';
 import { formatPlate } from '../../../utils/masks';
 import { GrainType, GrainTypeLabels, TruckType, TruckTypeLabels } from '../../../types';
 
-// Mock data
+// Dados mockados
 const COMPANIES = [
     { id: '1', name: 'AgroSul S/A' },
     { id: '2', name: 'Fazenda Rio Verde' },
@@ -57,7 +56,7 @@ export default function NewSchedule() {
     });
     const [isLoading, setIsLoading] = useState(false);
 
-    // Reset Filial when Empresa changes
+    // Reseta Filial quando Empresa muda
     useEffect(() => {
         setFormData(prev => ({ ...prev, branchId: '' }));
     }, [formData.companyId]);
@@ -67,14 +66,13 @@ export default function NewSchedule() {
         setFormData({ ...formData, licensePlate: formatted });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulação de delay de rede
+        // Simulação de delay de envio
         setTimeout(() => {
             setIsLoading(false);
-            // TODO: Integrar com API real futuramente
             navigate('/driver/active');
         }, 1500);
     };
@@ -82,136 +80,192 @@ export default function NewSchedule() {
     const isFormValid =
         formData.companyId &&
         formData.branchId &&
-        formData.licensePlate.length >= 7 &&
+        formData.licensePlate.length === 8 &&
         formData.truckType &&
         formData.grainType &&
         formData.carrierId;
 
+    const labelClass = "block text-sm font-semibold text-primary uppercase tracking-wide ml-1 mb-2";
+    const selectClass = "w-full bg-forest text-slate-100 border border-emerald/50 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-slate-500 shadow-sm appearance-none cursor-pointer";
+
     return (
-        <div className="min-h-screen bg-gray-50 pb-10">
-            {/* Header */}
-            <header className="bg-white border-b border-gray-100 p-4 sticky top-0 z-10">
-                <div className="max-w-lg mx-auto flex items-center gap-4">
-                    <button onClick={() => navigate('/driver')} className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors">
-                        <ArrowLeft size={20} />
-                    </button>
-                    <h1 className="text-lg font-bold text-gray-800">Agendar Embarque</h1>
-                </div>
-            </header>
+        <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+            <DriverHeader title="Novo Agendamento" />
 
-            <main className="max-w-lg mx-auto p-4 space-y-6 mt-4">
-                {/* Hero Card Visual */}
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 text-white shadow-xl shadow-blue-100 relative overflow-hidden">
-                    <div className="relative z-10">
-                        <h2 className="text-xl font-black mb-1">Novo Agendamento</h2>
-                        <p className="text-blue-100 text-sm">Preencha os dados abaixo para entrar na fila.</p>
-                    </div>
-                    <Truck className="absolute -right-6 -bottom-6 opacity-20 rotate-12" size={140} />
-                </div>
+            <main className="flex-1 max-w-md mx-auto w-full px-6 py-8 flex flex-col gap-6">
+                <section className="space-y-2">
+                    <h2 className="text-3xl font-bold dark:text-white tracking-tight">Agendar Embarque</h2>
+                    <p className="text-slate-500 dark:text-slate-400 font-normal text-base leading-relaxed">
+                        Preencha os dados abaixo para entrar na fila de carregamento.
+                    </p>
+                    <div className="h-1.5 w-16 bg-primary rounded-full mt-3"></div>
+                </section>
 
-                <form onSubmit={handleSubmit} className="space-y-5 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
-                                <Building2 size={16} />
+                <form onSubmit={handleSubmit} className="flex flex-col gap-6 mt-2">
+                    {/* Empresa e Filial */}
+                    <div className="space-y-5">
+                        <div className="space-y-2">
+                            <label className={labelClass}>Empresa</label>
+                            <div className="relative">
+                                <select
+                                    className={selectClass}
+                                    value={formData.companyId}
+                                    onChange={e => setFormData({ ...formData, companyId: e.target.value })}
+                                >
+                                    <option value="" disabled className="bg-forest text-slate-100 italic">Selecione a empresa</option>
+                                    {COMPANIES.map(c => (
+                                        <option key={c.id} value={c.id} className="bg-forest text-slate-100 italic">
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
+                                    <ArrowRight size={18} className="rotate-90" />
+                                </div>
                             </div>
-                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider">Localidade</h3>
                         </div>
 
-                        <Select
-                            label="Empresa"
-                            value={formData.companyId}
-                            onChange={e => setFormData({ ...formData, companyId: e.target.value })}
-                            options={COMPANIES.map(c => ({ label: c.name, value: c.id }))}
-                            placeholder="Selecione a empresa"
-                        />
-
-                        <Select
-                            label="Filial"
-                            value={formData.branchId}
-                            onChange={e => setFormData({ ...formData, branchId: e.target.value })}
-                            options={formData.companyId ? (BRANCHES[formData.companyId] || []).map(b => ({ label: b.name, value: b.id })) : []}
-                            disabled={!formData.companyId}
-                            placeholder={formData.companyId ? "Selecione a filial" : "Selecione uma empresa primeiro"}
-                        />
+                        <div className="space-y-2">
+                            <label className={labelClass}>Filial</label>
+                            <div className="relative">
+                                <select
+                                    className={`${selectClass} ${!formData.companyId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    value={formData.branchId}
+                                    onChange={e => setFormData({ ...formData, branchId: e.target.value })}
+                                    disabled={!formData.companyId}
+                                >
+                                    <option value="" disabled className="bg-forest text-slate-100 italic">
+                                        {formData.companyId ? "Selecione a unidade" : "Selecione a empresa primeiro"}
+                                    </option>
+                                    {(BRANCHES[formData.companyId] || []).map(b => (
+                                        <option key={b.id} value={b.id} className="bg-forest text-slate-100">
+                                            {b.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
+                                    <ArrowRight size={18} className="rotate-90" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="h-px bg-gray-50 my-6" />
+                    <div className="h-px bg-white/5 my-2" />
 
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
-                                <Truck size={16} />
+                    {/* Veículo */}
+                    <div className="space-y-5">
+                        <div className="space-y-2">
+                            <label className={labelClass}>Placa do Caminhão</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Truck size={20} className="text-slate-500" />
+                                </div>
+                                <input
+                                    className="w-full bg-forest text-slate-100 border border-emerald/50 rounded-xl pl-12 pr-4 py-3.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-slate-600 shadow-sm uppercase font-mono tracking-wider"
+                                    placeholder="ABC-1234"
+                                    value={formData.licensePlate}
+                                    onChange={handlePlateChange}
+                                    maxLength={8}
+                                />
                             </div>
-                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider">Veículo</h3>
                         </div>
 
-                        <Input
-                            label="Placa do Caminhão"
-                            placeholder="ABC-1234 ou ABC-1D23"
-                            value={formData.licensePlate}
-                            onChange={handlePlateChange}
-                            maxLength={8}
-                        />
-
-                        <Select
-                            label="Tipo de Caminhão"
-                            value={formData.truckType}
-                            onChange={e => setFormData({ ...formData, truckType: e.target.value })}
-                            options={TRUCK_TYPES}
-                            placeholder="Selecione o tipo"
-                        />
+                        <div className="space-y-2">
+                            <label className={labelClass}>Tipo de Caminhão</label>
+                            <div className="relative">
+                                <select
+                                    className={selectClass}
+                                    value={formData.truckType}
+                                    onChange={e => setFormData({ ...formData, truckType: e.target.value })}
+                                >
+                                    <option value="" disabled className="bg-forest text-slate-100 italic">Selecione o tipo</option>
+                                    {TRUCK_TYPES.map(t => (
+                                        <option key={t.value} value={t.value} className="bg-forest text-slate-100">
+                                            {t.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
+                                    <ArrowRight size={18} className="rotate-90" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="h-px bg-gray-50 my-6" />
+                    <div className="h-px bg-white/5 my-2" />
 
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
-                                <Package size={16} />
+                    {/* Carga */}
+                    <div className="space-y-5">
+                        <div className="space-y-2">
+                            <label className={labelClass}>Produto / Grão</label>
+                            <div className="relative">
+                                <select
+                                    className={selectClass}
+                                    value={formData.grainType}
+                                    onChange={e => setFormData({ ...formData, grainType: e.target.value })}
+                                >
+                                    <option value="" disabled className="bg-forest text-slate-100 italic">Selecione o grão</option>
+                                    {GRAIN_TYPES.map(g => (
+                                        <option key={g.value} value={g.value} className="bg-forest text-slate-100">
+                                            {g.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
+                                    <ArrowRight size={18} className="rotate-90" />
+                                </div>
                             </div>
-                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider">Carga</h3>
                         </div>
 
-                        <Select
-                            label="Tipo de Grão"
-                            value={formData.grainType}
-                            onChange={e => setFormData({ ...formData, grainType: e.target.value })}
-                            options={GRAIN_TYPES}
-                            placeholder="Selecione o grão"
-                        />
-
-                        <Select
-                            label="Transportadora"
-                            value={formData.carrierId}
-                            onChange={e => setFormData({ ...formData, carrierId: e.target.value })}
-                            options={CARRIERS}
-                            placeholder="Selecione a transportadora"
-                        />
+                        <div className="space-y-2">
+                            <label className={labelClass}>Transportadora</label>
+                            <div className="relative">
+                                <select
+                                    className={selectClass}
+                                    value={formData.carrierId}
+                                    onChange={e => setFormData({ ...formData, carrierId: e.target.value })}
+                                >
+                                    <option value="" disabled className="bg-forest text-slate-100 italic">Selecione a empresa</option>
+                                    {CARRIERS.map(c => (
+                                        <option key={c.value} value={c.value} className="bg-forest text-slate-100">
+                                            {c.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
+                                    <ArrowRight size={18} className="rotate-90" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <Button
-                        type="submit"
-                        className="w-full mt-6 py-4 rounded-2xl shadow-lg shadow-blue-50 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200"
-                        disabled={!isFormValid || isLoading}
-                    >
-                        {isLoading ? (
-                            <span className="flex items-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Processando...
-                            </span>
-                        ) : (
-                            <span className="flex items-center gap-2 font-bold uppercase tracking-widest text-xs">
-                                Confirmar Agendamento <CheckCircle size={18} />
-                            </span>
-                        )}
-                    </Button>
+                    <div className="pt-4">
+                        <button
+                            type="submit"
+                            disabled={!isFormValid || isLoading}
+                            className="w-full bg-primary hover:bg-primary/90 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-background-dark font-bold text-sm sm:text-lg py-4 rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all uppercase tracking-widest flex justify-center items-center gap-2 sm:gap-3 cursor-pointer whitespace-nowrap"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                    <span>Processando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Confirmar Agendamento</span>
+                                    <ArrowRight size={20} className="sm:w-[22px] sm:h-[22px]" />
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    <p className="text-center text-[10px] text-slate-500 dark:text-slate-500 px-4 leading-relaxed uppercase tracking-tighter">
+                        Ao agendar, você aceita os termos e normas de segurança da unidade e se compromete a respeitar o horário previsto.
+                    </p>
                 </form>
-
-                <p className="text-center text-xs text-gray-400 px-6">
-                    Ao confirmar, você está ciente de que deve respeitar o horário e as normas de segurança da unidade.
-                </p>
             </main>
+
+            <DriverFooter />
         </div>
     );
 }

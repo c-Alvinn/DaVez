@@ -1,15 +1,18 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import {
-    ArrowLeft,
     User,
     Settings,
     Key,
     LogOut,
     ChevronRight,
     Mail,
-    Phone
+    Phone,
+    Award
 } from 'lucide-react';
+import DriverHeader from '../../../components/layout/DriverHeader';
+import DriverFooter from '../../../components/layout/DriverFooter';
 
 interface ProfileItem {
     icon: React.ReactNode;
@@ -18,6 +21,7 @@ interface ProfileItem {
     action?: () => void;
     showChevron?: boolean;
     status?: string;
+    isDanger?: boolean;
 }
 
 interface ProfileSection {
@@ -29,7 +33,13 @@ export default function Profile() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
     const handleLogout = () => {
+        setIsLogoutModalOpen(true);
+    };
+
+    const confirmLogout = () => {
         logout();
         navigate('/');
     };
@@ -54,7 +64,7 @@ export default function Profile() {
                 },
                 {
                     icon: <Key size={18} />,
-                    label: 'Trocar Senha',
+                    label: 'Segurança e Senha',
                     action: () => console.log('Trocar senha'),
                     status: 'Em breve',
                     showChevron: true
@@ -64,71 +74,121 @@ export default function Profile() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-10">
-            <header className="bg-white border-b border-gray-100 p-4 sticky top-0 z-10 text-center relative">
-                <button
-                    onClick={() => navigate('/driver')}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full text-gray-600"
-                >
-                    <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-lg font-bold text-gray-800">Meu Perfil</h1>
-            </header>
+        <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors">
+            <DriverHeader title="Meu Perfil" />
 
-            <main className="max-w-lg mx-auto p-4 space-y-8 mt-4">
-                {/* Profile Card */}
-                <div className="text-center px-4">
-                    <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm overflow-hidden">
-                        <User size={48} />
+            <main className="flex-1 max-w-md mx-auto w-full px-6 py-8 flex flex-col gap-8">
+
+                {/* Profile Header Card */}
+                <section className="text-center space-y-4 pt-4 relative">
+                    <div className="relative inline-block group">
+                        <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/30 transition-all opacity-60"></div>
+                        <div className="w-28 h-28 bg-forest/40 dark:bg-card-dark text-primary rounded-full flex items-center justify-center mx-auto mb-2 border-4 border-white/5 shadow-2xl overflow-hidden relative z-10">
+                            <User size={56} strokeWidth={1.5} />
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-primary text-background-dark p-1.5 rounded-full z-20 shadow-lg border-2 border-background-dark">
+                            <Award size={14} />
+                        </div>
                     </div>
-                    <h2 className="text-xl font-black text-gray-900">{user?.name}</h2>
-                    <p className="text-sm text-gray-500 font-medium">Motorista Profissional</p>
-                </div>
+
+                    <div className="space-y-1">
+                        <h2 className="text-2xl font-black text-white tracking-tight">{user?.name || 'Perfil do Motorista'}</h2>
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="bg-primary/10 text-primary text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest border border-primary/20">
+                                Motorista Profissional
+                            </span>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Sections */}
-                <div className="space-y-6">
+                <section className="space-y-8">
                     {sections.map((section, idx) => (
-                        <div key={idx} className="space-y-3">
-                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] px-2">
+                        <div key={idx} className="space-y-4">
+                            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] px-2 opacity-80">
                                 {section.title}
                             </h3>
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="bg-forest/10 dark:bg-card-dark rounded-3xl border border-white/5 overflow-hidden shadow-xl">
                                 {section.items.map((item, i) => (
                                     <button
                                         key={i}
                                         onClick={item.action}
-                                        className={`w-full flex items-center gap-4 p-4 text-left active:bg-gray-50 transition-colors ${i !== section.items.length - 1 ? 'border-b border-gray-50' : ''
-                                            }`}
+                                        className={`w-full flex items-center gap-4 p-5 text-left active:bg-white/5 transition-all ${i !== section.items.length - 1 ? 'border-b border-white/5' : ''
+                                            } ${item.action ? 'cursor-pointer hover:bg-white/5' : 'cursor-default'}`}
                                         disabled={!item.action}
                                     >
-                                        <div className="p-2.5 bg-gray-50 rounded-xl text-gray-500">
+                                        <div className="p-3 bg-primary/5 rounded-2xl text-primary border border-primary/10 shrink-0">
                                             {item.icon}
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-tighter leading-none mb-1">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">
                                                 {item.label}
                                             </p>
-                                            <p className="font-bold text-gray-900">
-                                                {item.value || (item.status && <span className="text-orange-500 text-xs">{item.status}</span>)}
+                                            <p className="font-bold text-white text-sm truncate">
+                                                {item.value || (item.status && <span className="text-primary/50 text-xs italic">{item.status}</span>)}
                                             </p>
                                         </div>
-                                        {item.showChevron && <ChevronRight size={16} className="text-gray-300" />}
+                                        {item.showChevron && <ChevronRight size={18} className="text-primary/30 group-hover:text-primary transition-colors" />}
                                     </button>
                                 ))}
                             </div>
                         </div>
                     ))}
-                </div>
+                </section>
 
-                {/* Logout Button */}
-                <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-white border border-red-100 text-red-500 font-black text-sm rounded-2xl shadow-sm active:bg-red-50 transition-colors mt-8"
-                >
-                    <LogOut size={18} />
-                    SAIR DA CONTA
-                </button>
+                {/* Logout Action */}
+                <section className="pt-2">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-3 py-4.5 px-6 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 font-black text-xs rounded-2xl shadow-sm hover:bg-red-500/15 active:scale-[0.98] transition-all uppercase tracking-widest"
+                    >
+                        <LogOut size={18} />
+                        Sair da Conta
+                    </button>
+                </section>
             </main>
+
+            {/* Logout Confirmation Modal */}
+            {isLogoutModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setIsLogoutModalOpen(false)}
+                    />
+
+                    {/* Modal Content */}
+                    <div className="relative w-full max-w-sm bg-forest/40 dark:bg-card-dark border border-white/10 rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="text-center space-y-6">
+                            <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto text-red-500 border border-red-500/20">
+                                <LogOut size={32} />
+                            </div>
+
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-black text-white tracking-tight">Sair da Conta?</h3>
+                                <p className="text-sm text-slate-400 font-medium">Você precisará fazer login novamente para acessar seus dados.</p>
+                            </div>
+
+                            <div className="flex flex-col gap-3 pt-2">
+                                <button
+                                    onClick={confirmLogout}
+                                    className="w-full py-4 bg-red-500 hover:bg-red-600 text-white font-black text-xs rounded-2xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-all uppercase tracking-widest cursor-pointer"
+                                >
+                                    Sim, Sair agora
+                                </button>
+                                <button
+                                    onClick={() => setIsLogoutModalOpen(false)}
+                                    className="w-full py-4 bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs rounded-2xl border border-white/5 active:scale-[0.98] transition-all uppercase tracking-widest cursor-pointer"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <DriverFooter />
         </div>
     );
 }

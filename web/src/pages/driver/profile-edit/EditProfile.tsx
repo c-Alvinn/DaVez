@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Save } from 'lucide-react';
+import { Save, User, Mail, Phone, Camera } from 'lucide-react';
 import { useAuth } from '../../../context/useAuth';
-import { Button } from '../../../components/ui/Button';
-import { Input } from '../../../components/ui/Input';
+import DriverHeader from '../../../components/layout/DriverHeader';
+import DriverFooter from '../../../components/layout/DriverFooter';
 
 export default function EditProfile() {
     const { user } = useAuth();
@@ -12,94 +12,125 @@ export default function EditProfile() {
 
     const [formData, setFormData] = useState({
         name: user?.name || '',
-        email: 'motorista@exemplo.com', // Mocked as per Profile.tsx
-        phone: '(11) 99999-8888', // Mocked as per Profile.tsx
+        email: 'motorista@exemplo.com',
+        phone: '(11) 99999-8888',
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulation
         setTimeout(() => {
             setIsLoading(false);
             navigate('/driver/profile');
-        }, 1000);
+        }, 1200);
     };
 
+    const inputClass = "w-full bg-forest/20 dark:bg-card-dark text-white border border-white/5 rounded-2xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all placeholder-slate-600 shadow-sm text-sm font-bold";
+    const labelClass = "block text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-1 mb-2 opacity-80";
+
     return (
-        <div className="min-h-screen bg-gray-50 pb-10">
-            <header className="bg-white border-b border-gray-100 p-4 sticky top-0 z-10">
-                <div className="max-w-lg mx-auto flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/driver/profile')}
-                        className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
-                    <h1 className="text-lg font-bold text-gray-800">Editar Perfil</h1>
-                </div>
-            </header>
+        <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors">
+            <DriverHeader title="Editar Perfil" />
 
-            <main className="max-w-lg mx-auto p-4 space-y-6 mt-4">
-                <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
-                                <User size={16} />
-                            </div>
-                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider">Identificação</h3>
+            <main className="flex-1 max-w-md mx-auto w-full px-6 py-8 flex flex-col gap-8">
+
+                {/* Photo Section */}
+                <section className="text-center space-y-4">
+                    <div className="relative inline-block">
+                        <div className="w-24 h-24 bg-forest/40 dark:bg-card-dark text-primary/40 rounded-full flex items-center justify-center mx-auto border-4 border-white/5 shadow-2xl overflow-hidden relative">
+                            <User size={48} strokeWidth={1} />
                         </div>
+                    </div>
+                </section>
 
-                        <Input
-                            label="Nome Completo"
-                            value={formData.name}
-                            onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            placeholder="Seu nome completo"
-                            required
-                        />
-
-                        <Input
-                            label="E-mail"
-                            type="email"
-                            value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                            placeholder="seu@email.com"
-                            required
-                        />
-
-                        <Input
-                            label="Telefone"
-                            value={formData.phone}
-                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                            placeholder="(00) 00000-0000"
-                            required
-                        />
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Name Field */}
+                    <div className="relative group">
+                        <label className={labelClass}>Nome Completo</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary/50 group-focus-within:text-primary transition-colors">
+                                <User size={18} />
+                            </div>
+                            <input
+                                type="text"
+                                value={formData.name}
+                                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                className={inputClass}
+                                placeholder="Seu nome completo"
+                                required
+                            />
+                        </div>
                     </div>
 
-                    <div className="pt-4 space-y-3">
-                        <Button
-                            type="submit"
-                            className="w-full py-4 rounded-2xl shadow-lg shadow-blue-50 bg-blue-600 hover:bg-blue-700 font-bold uppercase tracking-widest text-xs"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Salvando...' : (
-                                <span className="flex items-center gap-2 justify-center">
-                                    Salvar Alterações <Save size={18} />
-                                </span>
-                            )}
-                        </Button>
+                    {/* Email Field */}
+                    <div className="relative group">
+                        <label className={labelClass}>E-mail Profissional</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary/50 group-focus-within:text-primary transition-colors">
+                                <Mail size={18} />
+                            </div>
+                            <input
+                                type="email"
+                                value={formData.email}
+                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                className={inputClass}
+                                placeholder="seu@email.com"
+                                required
+                            />
+                        </div>
+                    </div>
 
+                    {/* Phone Field */}
+                    <div className="relative group">
+                        <label className={labelClass}>Telefone / WhatsApp</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary/50 group-focus-within:text-primary transition-colors">
+                                <Phone size={18} />
+                            </div>
+                            <input
+                                type="text"
+                                value={formData.phone}
+                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                className={inputClass}
+                                placeholder="(00) 00000-0000"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="pt-6">
                         <button
-                            type="button"
-                            onClick={() => navigate('/driver/profile')}
-                            className="w-full py-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] hover:text-gray-600 transition-colors"
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-primary hover:bg-primary/90 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-background-dark font-black text-sm py-4.5 rounded-2xl shadow-xl hover:shadow-primary/10 active:scale-[0.98] transition-all uppercase tracking-[0.2em] flex justify-center items-center gap-3 cursor-pointer"
                         >
-                            Cancelar
+                            {isLoading ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-background-dark/30 border-t-background-dark rounded-full animate-spin" />
+                                    <span>Salvando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Salvar Alterações</span>
+                                    <Save size={18} />
+                                </>
+                            )}
                         </button>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={() => navigate('/driver/profile')}
+                        className="w-full text-center text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors py-2"
+                    >
+                        Descartar alterações
+                    </button>
                 </form>
             </main>
+
+            <DriverFooter />
         </div>
     );
 }

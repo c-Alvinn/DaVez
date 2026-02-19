@@ -1,119 +1,144 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Truck, Calendar, Clock, BadgeCheck } from 'lucide-react';
+import {
+    Clock,
+    RefreshCcw,
+    Store,
+    Trash2,
+    Calendar,
+    MapPin
+} from 'lucide-react';
+import DriverHeader from '../../../components/layout/DriverHeader';
+import DriverFooter from '../../../components/layout/DriverFooter';
 
 export default function ActiveAppointment() {
     const navigate = useNavigate();
 
-    // Mock de agendamento ativo
+    // Mock de agendamento ativo (dados integrados com o design)
     const activeAppointment = {
-        id: '12345',
-        company: 'AgroSul',
-        branch: 'Filial Matriz',
+        id: 'DZ-8842',
+        position: '04',
+        lastUpdate: '16:37:14',
+        nextUpdateSeconds: 6,
+        branch: 'Unidade de Rondonópolis',
+        plate: 'QAP-2024',
+        type: 'Bitrem (9 eixos)',
         grain: 'Soja',
-        plate: 'ABC-1234',
-        type: 'Carregamento',
-        date: '12/02/2026',
-        queuePosition: 4,
-        status: 'EM_ESPERA'
+        company: 'Agro Cargas Express',
+        date: '14 Out 2024',
+        address: 'Rodovia BR-163, Km 120 - Sorriso, MT'
+    };
+
+    const handleCancel = () => {
+        if (window.confirm('Tem certeza que deseja cancelar seu agendamento?')) {
+            // Em produção aqui haveria a chamada de API
+            navigate('/driver');
+        }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-10">
-            <header className="bg-white border-b border-gray-100 p-4 sticky top-0 z-10">
-                <div className="max-w-lg mx-auto flex items-center gap-4">
-                    <button onClick={() => navigate('/driver')} className="p-2 hover:bg-gray-100 rounded-full text-gray-600">
-                        <ArrowLeft size={20} />
-                    </button>
-                    <h1 className="text-lg font-bold text-gray-800">Agendamento Ativo</h1>
-                </div>
-            </header>
+        <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors">
+            <DriverHeader title="Consulta de Posição" />
 
-            <main className="max-w-lg mx-auto p-4 space-y-6">
-                {activeAppointment ? (
-                    <>
-                        {/* Queue Position */}
-                        <div className="bg-blue-600 rounded-2xl p-8 text-white text-center shadow-lg shadow-blue-100 relative overflow-hidden">
-                            <div className="relative z-10">
-                                <p className="text-blue-100 text-sm font-medium mb-1">Sua posição na fila</p>
-                                <h2 className="text-6xl font-black mb-2">{activeAppointment.queuePosition}º</h2>
-                                <div className="inline-flex items-center gap-2 bg-blue-500/30 px-4 py-1.5 rounded-full text-xs font-bold border border-blue-400/30">
-                                    <BadgeCheck size={14} />
-                                    AGENDAMENTO CONFIRMADO
-                                </div>
-                            </div>
-                            <div className="absolute -right-4 -bottom-4 opacity-10">
-                                <Truck size={140} />
-                            </div>
+            <main className="flex-1 max-w-md mx-auto w-full px-6 py-8 flex flex-col items-center gap-8">
+
+                {/* Queue Position Section */}
+                <section className="w-full text-center space-y-6 relative py-4">
+                    <h2 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Sua posição na fila</h2>
+
+                    <div className="relative flex items-center justify-center w-40 h-40 sm:w-52 sm:h-52 mx-auto rounded-full border-[6px] border-primary/10 bg-gradient-to-br from-white/5 to-transparent shadow-[0_0_40px_rgba(19,236,109,0.15)] backdrop-blur-sm group">
+                        {/* Spinning Border Effect */}
+                        <div className="absolute inset-[-6px] rounded-full border-t-[6px] border-primary opacity-80 animate-spin" style={{ animationDuration: '3s' }}></div>
+
+                        <div className="flex flex-col items-center">
+                            <span className="text-6xl sm:text-8xl font-black text-primary drop-shadow-[0_0_15px_rgba(19,236,109,0.4)] tracking-tighter">
+                                {activeAppointment.position}
+                            </span>
                         </div>
-
-                        {/* Details Card */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="p-5 border-b border-gray-50 bg-gray-50/50">
-                                <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                                    <Truck size={18} className="text-blue-600" />
-                                    Detalhes do Agendamento
-                                </h3>
-                            </div>
-                            <div className="p-5 space-y-4">
-                                <div className="flex gap-4">
-                                    <div className="p-3 bg-gray-100 rounded-xl text-gray-500 shrink-0">
-                                        <MapPin size={20} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Local</p>
-                                        <p className="font-bold text-gray-900">{activeAppointment.company} - {activeAppointment.branch}</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4 pt-2">
-                                    <div className="flex gap-3">
-                                        <div className="p-2.5 bg-gray-100 rounded-xl text-gray-500 shrink-0">
-                                            <Calendar size={18} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Data</p>
-                                            <p className="text-sm font-bold text-gray-900">{activeAppointment.date}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="p-2.5 bg-gray-100 rounded-xl text-gray-500 shrink-0">
-                                            <Clock size={18} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Operação</p>
-                                            <p className="text-sm font-bold text-gray-900">{activeAppointment.type}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 p-4 bg-orange-50 border border-orange-100 rounded-xl">
-                                    <p className="text-xs text-orange-700 leading-relaxed font-medium">
-                                        Fique atento! Quando sua posição for a 1ª, dirija-se imediatamente à balança de entrada.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button className="w-full py-4 text-red-500 font-bold text-sm bg-red-50 rounded-2xl active:bg-red-100 transition-colors">
-                            CANCELAR AGENDAMENTO
-                        </button>
-                    </>
-                ) : (
-                    <div className="bg-white rounded-2xl p-10 text-center border border-gray-100 shadow-sm">
-                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
-                            <Truck size={40} />
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900">Sem agendamentos</h3>
-                        <p className="text-gray-500 text-sm mt-1">Você não possui nenhum agendamento ativo no momento.</p>
-                        <button
-                            onClick={() => navigate('/driver/shipment')}
-                            className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-blue-100"
-                        >
-                            Agendar Agora
-                        </button>
                     </div>
-                )}
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2 text-slate-400 text-xs font-medium">
+                            <Clock size={14} className="opacity-70 text-primary" />
+                            <span>Última atualização: <span className="font-mono text-slate-200">{activeAppointment.lastUpdate}</span></span>
+                        </div>
+                        <div className="flex items-center justify-center gap-2 text-slate-500 text-[10px] uppercase tracking-wider">
+                            <RefreshCcw size={12} className="text-primary animate-reverse-spin" />
+                            <span>Próxima atualização em: <span className="font-mono text-primary font-bold">{activeAppointment.nextUpdateSeconds}s</span></span>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Details Card */}
+                <section className="w-full bg-forest/40 dark:bg-card-dark border border-white/5 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-primary/10 transition-colors duration-700"></div>
+
+                    <div className="space-y-6 relative z-10">
+                        {/* Branch Info */}
+                        <div className="flex justify-between items-start border-b border-white/5 pb-5">
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-primary uppercase font-black tracking-widest">Filial</p>
+                                <h3 className="text-white font-bold text-lg sm:text-xl leading-tight">{activeAppointment.branch}</h3>
+                                <div className="flex items-center gap-1.5 text-slate-400 text-[10px] sm:text-xs mt-1">
+                                    <MapPin size={12} className="text-primary/70 shrink-0" />
+                                    <span className="truncate max-w-[150px] sm:max-w-[200px]">{activeAppointment.address}</span>
+                                </div>
+                            </div>
+                            <div className="bg-primary/10 p-2 sm:p-2.5 rounded-2xl text-primary border border-primary/20 shrink-0 ml-2">
+                                <Store size={20} className="sm:w-[22px] sm:h-[22px]" />
+                            </div>
+                        </div>
+
+                        {/* Specs Grid */}
+                        <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-primary uppercase font-black tracking-widest">Placa</p>
+                                <p className="text-white font-bold text-base tracking-widest font-mono">{activeAppointment.plate}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-primary uppercase font-black tracking-widest">Veículo</p>
+                                <p className="text-white font-bold text-sm truncate">{activeAppointment.type}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-primary uppercase font-black tracking-widest">Grão</p>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(19,236,109,0.8)]"></span>
+                                    <p className="text-white font-bold text-sm">{activeAppointment.grain}</p>
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-primary uppercase font-black tracking-widest">Empresa</p>
+                                <p className="text-white font-bold text-sm truncate">{activeAppointment.company}</p>
+                            </div>
+                        </div>
+
+                        {/* Date info footer */}
+                        <div className="pt-4 border-t border-white/5 flex items-center justify-center text-slate-400 text-[10px] font-bold uppercase tracking-tighter">
+                            <div className="flex items-center gap-1.5">
+                                <Calendar size={12} className="text-primary/50" />
+                                <span>Agendado para: {activeAppointment.date}</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Actions */}
+                <div className="w-full space-y-4 pt-2">
+                    <button
+                        onClick={handleCancel}
+                        className="w-full py-4 px-4 rounded-2xl border border-red-500/20 text-red-500/80 font-bold text-xs hover:bg-red-500/5 hover:border-red-500/40 transition-all flex items-center justify-center gap-3 uppercase tracking-[0.15em] active:scale-[0.98] group"
+                    >
+                        <Trash2 size={18} className="group-hover:shake transition-transform" />
+                        Cancelar Agendamento
+                    </button>
+
+                    <p className="text-[9px] text-center text-slate-500 uppercase tracking-tighter font-medium px-8 leading-relaxed">
+                        Mantenha esta tela aberta para acompanhar sua posição em tempo real. Você receberá uma notificação quando chegar sua vez.
+                    </p>
+                </div>
+
             </main>
+
+            <DriverFooter />
         </div>
     );
 }

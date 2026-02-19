@@ -1,106 +1,106 @@
 import { useAuth } from '../../../context/useAuth';
 import { useNavigate } from 'react-router-dom';
 import {
-    LogOut,
     Truck,
     Search,
     History,
     User,
-    ChevronRight
+    ShieldCheck
 } from 'lucide-react';
+import DriverHeader from '../../../components/layout/DriverHeader';
+import DriverFooter from '../../../components/layout/DriverFooter';
+import DriverDashboardImage from '../../../assets/driver-dashboard.avif';
 
 export default function DriverDashboard() {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
-
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-    };
 
     const menuItems = [
         {
-            title: 'Embarque',
-            description: 'Agendar novo carregamento',
-            icon: <Truck size={24} className="text-blue-600" />,
+            title: 'Agendar Embarque',
+            icon: <Truck size={32} />,
             path: '/driver/shipment',
-            color: 'bg-blue-50'
         },
         {
             title: 'Consultar Agendamento',
-            description: 'Ver agendamento ativo e fila',
-            icon: <Search size={24} className="text-emerald-600" />,
+            icon: <Search size={32} />,
             path: '/driver/active',
-            color: 'bg-emerald-50'
         },
         {
-            title: 'Histórico de Agendamentos',
-            description: 'Ver viagens concluídas',
-            icon: <History size={24} className="text-purple-600" />,
+            title: 'Histórico de Viagens',
+            icon: <History size={32} />,
             path: '/driver/history',
-            color: 'bg-purple-50'
         },
         {
-            title: 'Perfil',
-            description: 'Meus dados e configurações',
-            icon: <User size={24} className="text-orange-600" />,
+            title: 'Meu Perfil Profissional',
+            icon: <User size={32} />,
             path: '/driver/profile',
-            color: 'bg-orange-50'
         }
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-10">
-            {/* Header */}
-            <header className="bg-white border-b border-gray-100 p-6 sticky top-0 z-10">
-                <div className="max-w-lg mx-auto flex justify-between items-center">
-                    <div>
-                        <p className="text-sm text-gray-500 font-medium">Bem-vindo de volta,</p>
-                        <h1 className="text-2xl font-bold text-gray-900">{user?.name || 'Motorista'}</h1>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                        title="Sair"
-                    >
-                        <LogOut size={22} />
-                    </button>
-                </div>
-            </header>
+        <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+            <DriverHeader title="Painel" />
 
-            <main className="max-w-lg mx-auto p-4 mt-4 space-y-4">
-                <div className="grid grid-cols-1 gap-4">
+            <main className="flex-1 max-w-md mx-auto w-full px-6 py-8 flex flex-col gap-8">
+                {/* Welcome Section */}
+                <section className="space-y-1">
+                    <p className="text-emerald-agro dark:text-lime-agro font-bold text-[10px] sm:text-xs uppercase tracking-widest">Painel do Motorista</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold leading-tight">
+                        Bem-vindo de volta, <br />
+                        <span className="text-emerald-agro dark:text-primary">
+                            {user?.name || 'Motorista'}
+                        </span>
+                    </h2>
+                    <div className="h-1.5 w-12 bg-primary rounded-full mt-2"></div>
+                </section>
+
+                {/* Menu Grid */}
+                <section className="grid grid-cols-2 gap-4">
                     {menuItems.map((item, index) => (
                         <button
                             key={index}
                             onClick={() => navigate(item.path)}
-                            className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 text-left active:scale-[0.98] transition-all hover:border-blue-200 group"
+                            className="bg-white dark:bg-primary/5 border border-slate-200 dark:border-white/5 p-5 sm:p-6 rounded-2xl flex flex-col items-start gap-3 sm:gap-4 transition-all active:scale-95 text-left shadow-sm hover:shadow-md group cursor-pointer"
                         >
-                            <div className={`${item.color} p-3 rounded-xl transition-transform group-hover:scale-110`}>
+                            <div className="bg-primary/10 dark:bg-primary/20 p-2.5 sm:p-3 rounded-xl group-hover:bg-primary/30 transition-colors text-primary">
                                 {item.icon}
                             </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-gray-900">{item.title}</h3>
-                                <p className="text-sm text-gray-500">{item.description}</p>
-                            </div>
-                            <ChevronRight className="text-gray-300 group-hover:text-gray-400 group-hover:translate-x-1 transition-all" />
+                            <span className="font-bold text-sm sm:text-base leading-tight dark:text-white/90">
+                                {item.title}
+                            </span>
                         </button>
                     ))}
-                </div>
+                </section>
 
-                {/* Info Card */}
-                <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg shadow-blue-100 mt-6 overflow-hidden relative">
-                    <div className="relative z-10">
-                        <h3 className="text-lg font-bold mb-2">Dica de Segurança</h3>
-                        <p className="text-blue-100 text-sm leading-relaxed">
-                            Mantenha sempre seus documentos em mãos ao chegar na unidade. Isso agiliza o seu processo de entrada.
+                {/* Security Tip Card */}
+                <section className="bg-primary/5 border border-primary/10 p-5 rounded-2xl flex items-start gap-4">
+                    <div className="mt-1 text-primary">
+                        <ShieldCheck size={24} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-primary text-[10px] sm:text-xs uppercase tracking-wide mb-1">Dica de Segurança</h4>
+                        <p className="text-xs sm:text-sm opacity-80 leading-relaxed italic">
+                            "Mantenha seus documentos em mãos ao chegar na unidade. Isso agiliza o seu processo de entrada."
                         </p>
                     </div>
-                    <div className="absolute -right-6 -bottom-6 opacity-10 rotate-12">
-                        <Truck size={120} />
+                </section>
+
+                {/* Visual Decorative Element */}
+                <div className="relative h-40 w-full rounded-2xl overflow-hidden mt-2 shadow-inner border border-white/5">
+                    <img
+                        alt="Logística Agro"
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 dark:opacity-40 grayscale hover:grayscale-0 transition-all duration-1000"
+                        src={DriverDashboardImage}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background-light dark:from-background-dark via-transparent to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 right-4 text-[10px] text-white/40 uppercase tracking-widest font-bold">
+                        Eficiência no Campo • Logística 4.0
                     </div>
                 </div>
             </main>
+
+            <DriverFooter />
         </div>
     );
 }

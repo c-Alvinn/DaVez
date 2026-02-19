@@ -36,14 +36,14 @@ export default function Landing() {
                                 </span>
                                 LOGÍSTICA 4.0
                             </div>
-                            <h1 className="text-5xl md:text-7xl font-extrabold text-white leading-tight mb-6">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
                                 Sua Vez de <br /><span className="text-primary">Inovar</span> na Logística Agrícola
                             </h1>
-                            <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-xl">
+                            <p className="text-base md:text-lg lg:text-xl text-slate-300 mb-10 leading-relaxed max-w-xl">
                                 Agendamento inteligente e gestão eficiente para o transporte de grãos. Reduza filas, otimize o tempo e aumente a produtividade do seu terminal.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Button to="/login" variant="primary">
+                                <Button to="/servicos" variant="primary">
                                     Saiba Mais
                                 </Button>
                             </div>
@@ -54,13 +54,13 @@ export default function Landing() {
                 {/* 2. Global Access Bar */}
                 <section className="relative z-20 -mt-16 max-w-7xl mx-auto px-6">
                     <div className="bg-emerald dark:bg-forest border border-white/5 rounded-2xl shadow-2xl p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Button to="/login?role=driver" variant="access" icon="local_shipping">
+                        <Button to="/login?role=driver" variant="access" icon="local_shipping" className="text-xs sm:text-sm lg:text-base">
                             ACESSO MOTORISTA
                         </Button>
-                        <Button to="/login?role=carrier" variant="access" icon="domain">
+                        <Button to="/login?role=carrier" variant="access" icon="domain" className="text-xs sm:text-sm lg:text-base">
                             ACESSO TRANSPORTADORA
                         </Button>
-                        <Button to="/login?role=internal" variant="access" icon="warehouse">
+                        <Button to="/login?role=internal" variant="access" icon="warehouse" className="text-xs sm:text-sm lg:text-base">
                             ACESSO ARMAZÉM
                         </Button>
                     </div>
@@ -105,8 +105,8 @@ export default function Landing() {
                     </picture>
                     <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
                     <div className="relative z-10 text-center max-w-4xl px-6">
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6">A Tecnologia que Move o Campo</h2>
-                        <p className="text-xl text-slate-300">Integramos hardware e software para criar um ecossistema logístico sem fricção, desde a colheita até o terminal portuário.</p>
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-6">A Tecnologia que Move o Campo</h2>
+                        <p className="text-lg lg:text-xl text-slate-300">Integramos hardware e software para criar um ecossistema logístico sem fricção, desde a colheita até o terminal portuário.</p>
                     </div>
                 </section>
 

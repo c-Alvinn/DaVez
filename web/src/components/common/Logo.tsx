@@ -5,9 +5,10 @@ interface LogoProps {
     className?: string;
     size?: 'sm' | 'md' | 'lg' | 'xl';
     showText?: boolean;
+    as?: 'link' | 'div';
 }
 
-export default function Logo({ className = '', size = 'md', showText = true }: LogoProps) {
+export default function Logo({ className = '', size = 'md', showText = true, as = 'link' }: LogoProps) {
     const sizeClasses = {
         sm: 'w-8 h-8',
         md: 'w-10 h-10',
@@ -22,8 +23,8 @@ export default function Logo({ className = '', size = 'md', showText = true }: L
         xl: 'text-4xl'
     };
 
-    return (
-        <Link to="/" className={`flex items-center gap-2 group cursor-pointer no-underline ${className}`}>
+    const content = (
+        <>
             <img
                 src={logoDavez}
                 alt="DaVez Logo"
@@ -34,6 +35,18 @@ export default function Logo({ className = '', size = 'md', showText = true }: L
                     Da<span className="text-primary">Vez</span>
                 </span>
             )}
+        </>
+    );
+
+    const baseClasses = `flex items-center gap-2 group cursor-pointer no-underline ${className}`;
+
+    if (as === 'div') {
+        return <div className={baseClasses}>{content}</div>;
+    }
+
+    return (
+        <Link to="/" className={baseClasses}>
+            {content}
         </Link>
     );
 }

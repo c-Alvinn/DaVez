@@ -12,6 +12,7 @@ import AppointmentHistory from './pages/driver/history/AppointmentHistory';
 import Profile from './pages/driver/profile/Profile';
 import EditProfile from './pages/driver/profile-edit/EditProfile';
 import OperatorDashboard from './pages/operator/dashboard/OperatorDashboard';
+import NotFound from './pages/error/NotFound';
 
 function App() {
   return (
@@ -34,6 +35,9 @@ function App() {
 
         {/* Rotas Operador */}
         <Route path="/dashboard" element={<OperatorDashboard />} />
+
+        {/* Catch-all 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
