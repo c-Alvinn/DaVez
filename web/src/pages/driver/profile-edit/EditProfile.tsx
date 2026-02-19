@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save, User, Mail, Phone, Camera } from 'lucide-react';
+import { Save, User, Mail, Phone } from 'lucide-react';
 import { useAuth } from '../../../context/useAuth';
 import DriverHeader from '../../../components/layout/DriverHeader';
 import DriverFooter from '../../../components/layout/DriverFooter';

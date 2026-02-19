@@ -1,2 +1,7 @@
 .agent/
 .inspiration/
+
+# Environment variables
+.env
+.env.*
+!.env.example
