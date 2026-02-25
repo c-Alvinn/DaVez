@@ -34,10 +34,11 @@ public class UserService {
     private static final Set<Role> INTERNAL_ROLES = Set.of(
             Role.MANAGER,
             Role.GATE_KEEPER,
-            Role.SCALE_OPERATOR
-    );
+            Role.SCALE_OPERATOR);
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, BranchRepository branchRepository, CompanyRepository companyRepository, SecurityUtils securityUtils, CarrierRepository carrierRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+            BranchRepository branchRepository, CompanyRepository companyRepository, SecurityUtils securityUtils,
+            CarrierRepository carrierRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.branchRepository = branchRepository;
@@ -78,8 +79,7 @@ public class UserService {
             if (!loggedUser.getCompany().getId().equals(data.companyId())) {
                 throw new ValidationException(
                         "Não é permitido cadastrar usuários fora do escopo da sua empresa. " +
-                                "Você está vinculado à empresa: " + loggedUser.getCompany().getName()
-                );
+                                "Você está vinculado à empresa: " + loggedUser.getCompany().getName());
             }
         }
 
@@ -89,9 +89,6 @@ public class UserService {
 
         if (userRepository.existsByUsername(data.username())) {
             throw new ValidationException("O nome de usuário '" + data.username() + "' já está em uso.");
-        }
-        if (data.cpf() != null && !data.cpf().isEmpty() && userRepository.existsByCpf(data.cpf())) {
-            throw new ValidationException("O CPF informado já está cadastrado.");
         }
 
         Company company = companyRepository.findById(data.companyId())
@@ -103,7 +100,6 @@ public class UserService {
         User newUser = new User();
         newUser.setName(data.name());
         newUser.setUsername(data.username());
-        newUser.setCpf(data.cpf());
         newUser.setRole(data.role());
         newUser.setCompany(company);
         newUser.setBranch(branch);
@@ -122,14 +118,14 @@ public class UserService {
         if (loggedUser.getRole() != Role.ADMIN) {
 
             if (loggedUser.getRole() != Role.CARRIER || loggedUser.getCarrier() == null) {
-                throw new UnauthorizedAccessException("Usuário sem permissão de Administrador Global ou sem vínculo com Transportadora.");
+                throw new UnauthorizedAccessException(
+                        "Usuário sem permissão de Administrador Global ou sem vínculo com Transportadora.");
             }
 
             if (!loggedUser.getCarrier().getId().equals(data.carrierId())) {
                 throw new ValidationException(
                         "Não é permitido cadastrar usuários para outras transportadoras. " +
-                                "Você está vinculado à transportadora " + loggedUser.getCarrier().getName()
-                );
+                                "Você está vinculado à transportadora " + loggedUser.getCarrier().getName());
             }
         }
 

@@ -72,7 +72,7 @@ export default function OperatorDriverSearch() {
                                     onClick={() => {
                                         setSearchType(type);
                                     }}
-                                    className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 border ${searchType === type
+                                    className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 border cursor-pointer ${searchType === type
                                         ? 'bg-primary border-primary text-background-dark shadow-lg shadow-primary/20'
                                         : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'
                                         }`}
@@ -99,7 +99,7 @@ export default function OperatorDriverSearch() {
                                 <button
                                     type="button"
                                     onClick={clearSearch}
-                                    className="absolute inset-y-0 right-6 flex items-center text-slate-500 hover:text-white transition-colors"
+                                    className="absolute inset-y-0 right-6 flex items-center text-slate-500 hover:text-white transition-colors cursor-pointer"
                                 >
                                     <X size={20} />
                                 </button>

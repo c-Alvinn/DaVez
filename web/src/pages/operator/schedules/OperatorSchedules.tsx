@@ -149,14 +149,14 @@ export default function OperatorSchedules({ title = 'Agendamentos' }: { title?: 
                         <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(prev => prev - 1)}
-                            className="p-2 bg-white/5 border border-white/5 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 transition-all hover:bg-white/10"
+                            className="p-2 bg-white/5 border border-white/5 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 transition-all hover:bg-white/10 cursor-pointer"
                         >
                             <ChevronLeft size={20} />
                         </button>
                         <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(prev => prev + 1)}
-                            className="p-2 bg-white/5 border border-white/5 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 transition-all hover:bg-white/10"
+                            className="p-2 bg-white/5 border border-white/5 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 transition-all hover:bg-white/10 cursor-pointer"
                         >
                             <ChevronRight size={20} />
                         </button>
@@ -185,7 +185,7 @@ function ActionButton({ icon, tooltip, onClick, variant }: { icon: any, tooltip:
         <button
             title={tooltip}
             onClick={onClick}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-300 ${variants[variant]}`}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-300 cursor-pointer ${variants[variant]}`}
         >
             {icon}
         </button>

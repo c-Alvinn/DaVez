@@ -19,6 +19,9 @@ import OperatorSchedules from '../schedules/OperatorSchedules';
 import OperatorAttendance from '../attendance/OperatorAttendance';
 import OperatorReports from '../reports/OperatorReports';
 import OperatorDriverSearch from '../search/OperatorDriverSearch';
+import OperatorCreateAppointment from '../appointments/OperatorCreateAppointment';
+import OperatorRegisterEmployee from '../employees/OperatorRegisterEmployee';
+import OperatorProfile from '../profile/OperatorProfile';
 
 type Page = 'inicio' | 'embarque' | 'desembarque' | 'atendimentos' | 'relatorios' | 'buscar' | 'cadastrar_agendamento' | 'cadastrar_funcionario' | 'perfil';
 
@@ -66,7 +69,10 @@ export default function OperatorDashboard() {
             {activePage === 'atendimentos' && <OperatorAttendance />}
             {activePage === 'relatorios' && <OperatorReports />}
             {activePage === 'buscar' && <OperatorDriverSearch />}
-            {activePage !== 'inicio' && activePage !== 'embarque' && activePage !== 'desembarque' && activePage !== 'atendimentos' && activePage !== 'relatorios' && activePage !== 'buscar' && (
+            {activePage === 'cadastrar_agendamento' && <OperatorCreateAppointment />}
+            {activePage === 'cadastrar_funcionario' && <OperatorRegisterEmployee />}
+            {activePage === 'perfil' && <OperatorProfile />}
+            {activePage !== 'inicio' && activePage !== 'embarque' && activePage !== 'desembarque' && activePage !== 'atendimentos' && activePage !== 'relatorios' && activePage !== 'buscar' && activePage !== 'cadastrar_agendamento' && activePage !== 'cadastrar_funcionario' && activePage !== 'perfil' && (
                 <div className="flex-1 flex items-center justify-center border-2 border-dashed border-white/5 rounded-[2rem] bg-white/[0.02]">
                     <div className="text-center space-y-4">
                         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary">

@@ -27,7 +27,7 @@ export function OperatorSidebar({
             <div className="mb-10">
                 <button
                     onClick={() => onPageChange('inicio')}
-                    className="hover:opacity-80 transition-opacity active:scale-[0.98] transition-transform"
+                    className="hover:opacity-80 transition-opacity active:scale-[0.98] transition-transform cursor-pointer"
                 >
                     <Logo size="md" as="div" />
                 </button>
@@ -49,7 +49,7 @@ export function OperatorSidebar({
                         <button
                             key={item.id}
                             onClick={() => item.id && onPageChange(item.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group ${isActive
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive
                                 ? 'bg-primary text-background-dark font-bold shadow-lg shadow-primary/20'
                                 : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                 }`}
@@ -66,7 +66,7 @@ export function OperatorSidebar({
 
             <button
                 onClick={onLogout}
-                className="mt-8 flex items-center gap-3 px-4 py-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-sm w-full border border-transparent hover:border-red-500/20"
+                className="mt-8 flex items-center gap-3 px-4 py-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-sm w-full border border-transparent hover:border-red-500/20 cursor-pointer"
             >
                 <LogOut size={20} />
                 Sair da Conta
