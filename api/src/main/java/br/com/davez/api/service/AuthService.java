@@ -4,12 +4,14 @@ import br.com.davez.api.model.dto.user.LoginRequestDTO;
 import br.com.davez.api.model.dto.user.LoginResponseDTO;
 import br.com.davez.api.model.dto.user.UserResponseDTO;
 import br.com.davez.api.model.entity.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -22,19 +24,21 @@ public class AuthService {
 
     /**
      * Processa a autenticação do usuário.
-     * @param data O DTO de requisição contendo o loginIdentifier (CPF ou Username) e a senha.
+     * 
+     * @param data O DTO de requisição contendo o loginIdentifier (CPF ou Username)
+     *             e a senha.
      * @return O JWT gerado.
      */
     public LoginResponseDTO authenticate(LoginRequestDTO data) {
 
         var authenticationToken = new UsernamePasswordAuthenticationToken(
                 data.loginIdentifier(),
-                data.password()
-        );
+                data.password());
 
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
         User user = (User) authentication.getPrincipal();
+        log.info("Usuário autenticado com sucesso: [{}] com perfil [{}]", user.getUsername(), user.getRole());
 
         return new LoginResponseDTO(tokenService.generateToken(user), mapUserToResponseDTO(user));
     }
@@ -62,7 +66,6 @@ public class AuthService {
                 branchId,
                 branchName,
                 carrierId,
-                carrierName
-        );
+                carrierName);
     }
 }

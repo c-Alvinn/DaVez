@@ -1,5 +1,6 @@
 .agent/
 .inspiration/
+.vscode/
 
 # Environment variables
 .env

@@ -47,7 +47,7 @@ export default function OperatorReports() {
                             <button
                                 key={p.id}
                                 onClick={() => setPeriod(p.id)}
-                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${period === p.id
+                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 cursor-pointer ${period === p.id
                                     ? 'bg-primary text-background-dark shadow-lg shadow-primary/20 scale-[1.02]'
                                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
@@ -61,7 +61,7 @@ export default function OperatorReports() {
                     {/* Export Button */}
                     <button
                         onClick={handleDownloadPDF}
-                        className="flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-white text-sm font-bold hover:bg-white/10 transition-all active:scale-95"
+                        className="flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-white text-sm font-bold hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
                     >
                         <FileDown size={20} className="text-primary" />
                         Exportar PDF

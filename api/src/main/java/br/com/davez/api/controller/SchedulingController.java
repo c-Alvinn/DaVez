@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import br.com.davez.api.model.dto.report.QueueStatusReportDTO;
 import br.com.davez.api.model.dto.schedule.ScheduleRequestDTO;
 import br.com.davez.api.model.dto.schedule.ScheduleResponseDTO;
-import br.com.davez.api.model.dto.schedule.ScheduleTransitionDTO;
 import br.com.davez.api.model.enums.ReportPeriod;
 import br.com.davez.api.service.ReportingService;
 import br.com.davez.api.service.ScheduleService;
@@ -25,7 +24,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/schedule")
-@Tag(name = "Agendamentos", description = "Gestão de Agendamentos e Fila")
+@Tag(name = "Agendamentos Gerais", description = "Gestão Global de Agendamentos e Relatórios")
 @SecurityRequirement(name = "bearer-key")
 public class SchedulingController {
 
@@ -46,58 +45,12 @@ public class SchedulingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Listar Agendamentos", description = "Retorna todos os agendamentos.")
+    @Operation(summary = "Listar Agendamentos", description = "Retorna todos os agendamentos conforme o escopo do usuário.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     @GetMapping
     public ResponseEntity<List<ScheduleResponseDTO>> findAll() {
         List<ScheduleResponseDTO> response = scheduleService.findAll();
         return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Buscar Agendamento por ID", description = "Retorna os detalhes de um agendamento.")
-    @ApiResponse(responseCode = "200", description = "Agendamento encontrado")
-    @ApiResponse(responseCode = "404", description = "Agendamento não encontrado")
-    @GetMapping("/{id}")
-    public ResponseEntity<ScheduleResponseDTO> findById(@PathVariable Long id) {
-        ScheduleResponseDTO response = scheduleService.findById(id);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Mover para Em Atendimento", description = "Altera o status do agendamento para EM ATENDIMENTO (Chamada).")
-    @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Transição inválida")
-    @ApiResponse(responseCode = "404", description = "Agendamento não encontrado")
-    @PatchMapping("/in-service")
-    public ResponseEntity<Void> moveToInService(@RequestBody @Valid ScheduleTransitionDTO request) {
-        scheduleService.moveToInService(request);
-        return ResponseEntity.ok().build();
-    }
-
-    @Operation(summary = "Mover para Concluído", description = "Finaliza o atendimento e libera o veículo.")
-    @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso")
-    @ApiResponse(responseCode = "404", description = "Agendamento não encontrado")
-    @PatchMapping("/completed")
-    public ResponseEntity<Void> moveToCompleted(@RequestBody @Valid ScheduleTransitionDTO request) {
-        scheduleService.moveToCompleted(request);
-        return ResponseEntity.ok().build();
-    }
-
-    @Operation(summary = "Cancelar Agendamento", description = "Cancela um agendamento existente.")
-    @ApiResponse(responseCode = "200", description = "Agendamento cancelado com sucesso")
-    @ApiResponse(responseCode = "404", description = "Agendamento não encontrado")
-    @PatchMapping("/cancel")
-    public ResponseEntity<Void> cancel(@RequestBody @Valid ScheduleTransitionDTO request) {
-        scheduleService.cancel(request);
-        return ResponseEntity.ok().build();
-    }
-
-    @Operation(summary = "Excluir Agendamento", description = "Remove um agendamento pelo ID.")
-    @ApiResponse(responseCode = "204", description = "Agendamento excluído")
-    @ApiResponse(responseCode = "404", description = "Agendamento não encontrado")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        scheduleService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Relatório de Status da Fila", description = "Retorna o status atual da fila por filial.")
@@ -114,13 +67,9 @@ public class SchedulingController {
             HttpServletResponse response) throws Exception {
 
         response.setContentType("application/pdf");
-
         String dateStamp = LocalDate.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy"));
-
         String fileName = String.format("relatorio_atendimentos_%s_%s.pdf", period.name(), dateStamp);
-
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-
         reportingService.generatePerformanceReport(period, response);
     }
 }

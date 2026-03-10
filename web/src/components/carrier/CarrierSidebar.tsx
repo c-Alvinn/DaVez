@@ -9,19 +9,19 @@ export interface MenuItem {
     type?: 'divider' | 'item';
 }
 
-interface OperatorSidebarProps {
+interface CarrierSidebarProps {
     activePage: string;
     onPageChange: (page: string) => void;
     onLogout: () => void;
     menuItems: MenuItem[];
 }
 
-export function OperatorSidebar({
+export function CarrierSidebar({
     activePage,
     onPageChange,
     onLogout,
     menuItems
-}: OperatorSidebarProps) {
+}: CarrierSidebarProps) {
     return (
         <aside className="w-full md:w-80 bg-[#0a140f] border-r border-white/5 flex flex-col p-8 z-20">
             <div className="mb-10">
@@ -31,7 +31,7 @@ export function OperatorSidebar({
                 >
                     <Logo size="md" as="div" />
                 </button>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-2 ml-1">PAINEL OPERACIONAL</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-2 ml-1">PAINEL TRANSPORTADOR</p>
             </div>
 
             <nav className="flex-1 space-y-1 overflow-y-auto pr-2 custom-scrollbar">

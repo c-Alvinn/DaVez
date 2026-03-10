@@ -15,7 +15,7 @@ interface DriverData {
     phone: string;
 }
 
-export default function OperatorDriverSearch() {
+export default function CarrierDriverSearch() {
     const [searchType, setSearchType] = useState<SearchType>('cpf');
     const [query, setQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +56,7 @@ export default function OperatorDriverSearch() {
             {/* Page Header */}
             <div className="mb-10 text-center md:text-left">
                 <h2 className="text-3xl font-black text-white tracking-tight">Buscar Motorista</h2>
-                <p className="text-slate-400 font-medium">Localize informações rápidas de motoristas cadastrados.</p>
+                <p className="text-slate-400 font-medium">Localize informações rápidas de motoristas cadastrados na plataforma.</p>
             </div>
 
             {/* Search Box */}
@@ -183,5 +183,3 @@ export default function OperatorDriverSearch() {
         </div>
     );
 }
-
-// Estilo de shake para erro se necessário seria adicionado ao CSS global ou via Tailwind inline

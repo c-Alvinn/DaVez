@@ -30,6 +30,9 @@ public class Schedule extends BaseEntity {
     @Version
     private Long version;
 
+    @Column(name = "ticket_code", nullable = false, unique = true)
+    private String ticketCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;

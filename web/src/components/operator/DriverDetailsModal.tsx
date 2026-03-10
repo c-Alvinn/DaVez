@@ -20,7 +20,7 @@ export function DriverDetailsModal({ isOpen, onClose, driver }: DriverDetailsMod
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-background-dark/80 backdrop-blur-md"
+                className="absolute inset-0 bg-background-dark/80 backdrop-blur-md cursor-pointer"
                 onClick={onClose}
             ></div>
 
@@ -36,7 +36,7 @@ export function DriverDetailsModal({ isOpen, onClose, driver }: DriverDetailsMod
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-white/5 rounded-full text-slate-400 transition-colors"
+                        className="p-2 hover:bg-white/5 rounded-full text-slate-400 transition-colors cursor-pointer"
                     >
                         <X size={20} />
                     </button>
@@ -70,7 +70,7 @@ export function DriverDetailsModal({ isOpen, onClose, driver }: DriverDetailsMod
                 <div className="px-8 py-6 border-t border-white/5 bg-white/[0.02]">
                     <button
                         onClick={onClose}
-                        className="w-full py-4 bg-primary text-background-dark font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest text-sm"
+                        className="w-full py-4 bg-primary text-background-dark font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest text-sm cursor-pointer"
                     >
                         Fechar Detalhes
                     </button>

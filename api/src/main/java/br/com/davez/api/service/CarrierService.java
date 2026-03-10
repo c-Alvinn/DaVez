@@ -26,9 +26,13 @@ public class CarrierService {
         if (carrierRepository.existsByName(dto.name())) {
             throw new ValidationException("O nome da transportadora '" + dto.name() + "' já está em uso.");
         }
+        if (dto.cnpj() != null && carrierRepository.existsByCnpj(dto.cnpj())) {
+            throw new ValidationException("O CNPJ " + dto.cnpj() + " já está cadastrado.");
+        }
 
         Carrier carrier = new Carrier();
         carrier.setName(dto.name());
+        carrier.setCnpj(dto.cnpj());
 
         Carrier savedCarrier = carrierRepository.save(carrier);
         return toResponseDTO(savedCarrier);
@@ -42,8 +46,13 @@ public class CarrierService {
         if (!carrier.getName().equalsIgnoreCase(dto.name()) && carrierRepository.existsByName(dto.name())) {
              throw new ValidationException("O nome '" + dto.name() + "' já está em uso por outra transportadora.");
         }
+        
+        if (dto.cnpj() != null && !dto.cnpj().equals(carrier.getCnpj()) && carrierRepository.existsByCnpj(dto.cnpj())) {
+            throw new ValidationException("O CNPJ " + dto.cnpj() + " já está em uso.");
+        }
 
         carrier.setName(dto.name());
+        carrier.setCnpj(dto.cnpj());
 
         Carrier updatedCarrier = carrierRepository.save(carrier);
         return toResponseDTO(updatedCarrier);
@@ -74,7 +83,8 @@ public class CarrierService {
     private CarrierResponseDTO toResponseDTO(Carrier carrier) {
         return new CarrierResponseDTO(
                 carrier.getId(),
-                carrier.getName()
+                carrier.getName(),
+                carrier.getCnpj()
         );
     }
 }

@@ -13,6 +13,7 @@ import br.com.davez.api.repository.BranchRepository;
 import br.com.davez.api.repository.ScheduleRepository;
 import br.com.davez.api.utils.PdfReportGenerator;
 import br.com.davez.api.utils.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ReportingService {
 
     private final ScheduleRepository scheduleRepository;
@@ -84,5 +86,6 @@ public class ReportingService {
                 loggedUser.getCompany().getName(),
                 period.getLabel()
         );
+        log.info("Relatório de desempenho gerado: Período [{}] por [{}]", period.getLabel(), loggedUser.getUsername());
     }
 }
