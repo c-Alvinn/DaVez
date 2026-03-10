@@ -30,8 +30,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
             "AND s.queuePosition > :oldPosition")
     int reorderQueuePositions(@Param("branchId") Long branchId, @Param("oldPosition") Integer oldPosition);
 
-    List<Schedule> findAllByBranchIdAndQueueStatusOrderByQueuePositionAsc(
-            @Param("branchId") Long branchId,
+    List<Schedule> findAllByBranchCodeAndQueueStatusOrderByQueuePositionAsc(
+            @Param("branchCode") String branchCode,
             @Param("status") QueueStatus status
     );
 
@@ -47,9 +47,15 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     long countByBranchIdAndQueueStatus(Long branchId, QueueStatus status);
 
-    List<Schedule> findByBranch_Company_Id(Long companyId);
-    List<Schedule> findByCarrierId(Long carrierId);
+    List<Schedule> findByBranch_Company_Cnpj(String cnpj);
+    
+    @Query("SELECT s FROM schedule s WHERE s.carrier.cnpj = :cnpj")
+    List<Schedule> findByCarrierCnpj(@Param("cnpj") String cnpj);
+    
     List<Schedule> findByDriverId(Long driverId);
+    
+    List<Schedule> findByBranchCode(String branchCode);
+
     List<Schedule> findByBranchId(Long branchId);
 
     @Query("SELECT s FROM schedule s WHERE s.branch.company.id = :companyId " +

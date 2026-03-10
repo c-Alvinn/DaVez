@@ -37,21 +37,21 @@ public class BranchController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Atualizar Filial", description = "Atualiza dados de uma filial.")
+    @Operation(summary = "Atualizar Filial", description = "Atualiza dados de uma filial pelo código.")
     @ApiResponse(responseCode = "200", description = "Filial atualizada")
     @ApiResponse(responseCode = "404", description = "Filial não encontrada")
-    @PutMapping("/{id}")
-    public ResponseEntity<BranchResponseDTO> update(@PathVariable Long id, @RequestBody @Valid BranchRequestDTO dto) {
-        BranchResponseDTO response = branchService.update(id, dto);
+    @PutMapping("/{code}")
+    public ResponseEntity<BranchResponseDTO> update(@PathVariable String code, @RequestBody @Valid BranchRequestDTO dto) {
+        BranchResponseDTO response = branchService.update(code, dto);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Excluir Filial", description = "Remove uma filial pelo ID.")
+    @Operation(summary = "Excluir Filial", description = "Remove uma filial pelo código.")
     @ApiResponse(responseCode = "204", description = "Filial excluída")
     @ApiResponse(responseCode = "404", description = "Filial não encontrada")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        branchService.delete(id);
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Void> delete(@PathVariable String code) {
+        branchService.delete(code);
         return ResponseEntity.noContent().build();
     }
 
@@ -63,20 +63,20 @@ public class BranchController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Buscar Filial por ID", description = "Retorna detalhes de uma filial.")
+    @Operation(summary = "Buscar Filial por Código", description = "Retorna detalhes de uma filial.")
     @ApiResponse(responseCode = "200", description = "Filial encontrada")
     @ApiResponse(responseCode = "404", description = "Filial não encontrada")
-    @GetMapping("/{id}")
-    public ResponseEntity<BranchResponseDTO> findById(@PathVariable Long id) {
-        BranchResponseDTO response = branchService.findById(id);
+    @GetMapping("/{code}")
+    public ResponseEntity<BranchResponseDTO> findByCode(@PathVariable String code) {
+        BranchResponseDTO response = branchService.findByCode(code);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Listar Filiais por Empresa", description = "Retorna filiais de uma empresa específica.")
+    @Operation(summary = "Listar Filiais por Empresa", description = "Retorna filiais de uma empresa específica pelo CNPJ.")
     @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
-    @GetMapping("/company/{companyId}")
-    public ResponseEntity<List<BranchResponseDTO>> findByCompanyId(@PathVariable Long companyId) {
-        List<BranchResponseDTO> response = branchService.findBranchesByCompanyId(companyId);
+    @GetMapping("/company/{companyCnpj}")
+    public ResponseEntity<List<BranchResponseDTO>> findByCompanyCnpj(@PathVariable String companyCnpj) {
+        List<BranchResponseDTO> response = branchService.findBranchesByCompanyCnpj(companyCnpj);
         return ResponseEntity.ok(response);
     }
 }

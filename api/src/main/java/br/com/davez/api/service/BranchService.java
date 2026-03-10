@@ -2,6 +2,7 @@ package br.com.davez.api.service;
 
 import br.com.davez.api.model.dto.branch.BranchRequestDTO;
 import br.com.davez.api.model.dto.branch.BranchResponseDTO;
+import br.com.davez.api.model.dto.master.BranchMasterDTO;
 import br.com.davez.api.exceptions.ResourceNotFoundException;
 import br.com.davez.api.exceptions.ValidationException;
 import br.com.davez.api.exceptions.UnauthorizedAccessException;
@@ -30,43 +31,36 @@ public class BranchService {
     public BranchService(
             BranchRepository branchRepository,
             CompanyRepository companyRepository,
-            SecurityUtils securityUtils
-    ) {
+            SecurityUtils securityUtils) {
         this.branchRepository = branchRepository;
         this.companyRepository = companyRepository;
         this.securityUtils = securityUtils;
     }
 
-    private void validateInternalScope(Long targetCompanyId) {
+    private void validateInternalScopeAndGetBranch(String companyCnpj, String action) {
         User loggedUser = securityUtils.getLoggedUser();
 
-        if (loggedUser.getRole() == Role.ADMIN) {
-            return;
-        }
-
-        if (loggedUser.getRole() == Role.MANAGER ||
-                loggedUser.getRole() == Role.SCALE_OPERATOR ||
-                loggedUser.getRole() == Role.GATE_KEEPER) {
-
-            if (loggedUser.getCompany() == null ||
-                    !loggedUser.getCompany().getId().equals(targetCompanyId)) {
-
-                String action = loggedUser.getRole() == Role.MANAGER ? "modificar/acessar" : "acessar";
+        if (loggedUser.getRole() != Role.ADMIN) {
+            if (loggedUser.getCompany() == null || !loggedUser.getCompany().getCnpj().equals(companyCnpj)) {
+                log.warn("Tentativa de acesso não autorizado: Usuário [{}] da Empresa [{}] tentou {} dados da Empresa [{}]",
+                        loggedUser.getUsername(),
+                        loggedUser.getCompany() != null ? loggedUser.getCompany().getCnpj() : "N/A",
+                        action,
+                        companyCnpj);
 
                 throw new ValidationException(
                         String.format("Usuário (%s) sem permissão para %s filiais fora do escopo da sua empresa.",
-                                loggedUser.getRole().name(), action)
-                );
+                                loggedUser.getRole().name(), action));
             }
         }
     }
 
     @Transactional
     public BranchResponseDTO create(BranchRequestDTO dto) {
-        validateInternalScope(dto.companyId());
+        Company company = companyRepository.findByCnpj(dto.companyCnpj())
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "cnpj", dto.companyCnpj()));
 
-        Company company = companyRepository.findById(dto.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", dto.companyId()));
+        validateInternalScopeAndGetBranch(company.getCnpj(), "cadastrar");
 
         if (branchRepository.existsByCode(dto.branchCode())) {
             throw new ValidationException("O código de filial '" + dto.branchCode() + "' já está em uso.");
@@ -79,26 +73,20 @@ public class BranchService {
         branch.setCompany(company);
 
         Branch savedBranch = branchRepository.save(branch);
-        log.info("Nova filial cadastrada: [{}] (Código: [{}]) para a empresa [{}]", 
+        log.info("Nova filial cadastrada: [{}] (Código: [{}]) para a empresa [{}]",
                 savedBranch.getName(), savedBranch.getCode(), savedBranch.getCompany().getName());
         return toResponseDTO(savedBranch);
     }
 
     @Transactional
-    public BranchResponseDTO update(Long id, BranchRequestDTO dto) {
-        Branch branch = branchRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Branch", "id", id));
+    public BranchResponseDTO update(String code, BranchRequestDTO dto) {
+        Branch branch = branchRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch", "code", code));
 
-        validateInternalScope(branch.getCompany().getId());
+        validateInternalScopeAndGetBranch(branch.getCompany().getCnpj(), "atualizar");
 
-        if (!branch.getCompany().getId().equals(dto.companyId())) {
-            validateInternalScope(dto.companyId());
-
-            Company newCompany = companyRepository.findById(dto.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Company", "id", dto.companyId()));
-
-            branch.setCompany(newCompany);
-        }
+        Company company = companyRepository.findByCnpj(dto.companyCnpj())
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "cnpj", dto.companyCnpj()));
 
         if (!branch.getCode().equals(dto.branchCode()) && branchRepository.existsByCode(dto.branchCode())) {
             throw new ValidationException("O código de filial '" + dto.branchCode() + "' já está em uso.");
@@ -107,28 +95,27 @@ public class BranchService {
         branch.setName(dto.name());
         branch.setAddress(dto.address());
         branch.setCode(dto.branchCode());
+        branch.setCompany(company);
 
         return toResponseDTO(branchRepository.save(branch));
     }
 
     @Transactional
-    public void delete(Long id) {
-        Branch branch = branchRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Branch", "id", id));
+    public void delete(String code) {
+        Branch branch = branchRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch", "code", code));
 
-        validateInternalScope(branch.getCompany().getId());
-
-        branchRepository.deleteById(id);
-        log.info("Filial ID [{}] removida com sucesso.", id);
+        validateInternalScopeAndGetBranch(branch.getCompany().getCnpj(), "excluir");
+        branchRepository.delete(branch);
+        log.info("Filial código [{}] removida com sucesso.", code);
     }
 
     @Transactional(readOnly = true)
-    public BranchResponseDTO findById(Long id) {
-        Branch branch = branchRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Branch", "id", id));
+    public BranchResponseDTO findByCode(String code) {
+        Branch branch = branchRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch", "code", code));
 
-        validateInternalScope(branch.getCompany().getId());
-
+        validateInternalScopeAndGetBranch(branch.getCompany().getCnpj(), "visualizar");
         return toResponseDTO(branch);
     }
 
@@ -147,21 +134,19 @@ public class BranchService {
             if (loggedUser.getCompany() == null) {
                 return List.of();
             }
-            return branchRepository.findByCompanyId(loggedUser.getCompany().getId()).stream()
+            return branchRepository.findByCompanyCnpj(loggedUser.getCompany().getCnpj()).stream()
                     .map(this::toResponseDTO)
                     .collect(Collectors.toList());
         }
 
-        throw new UnauthorizedAccessException("Este endpoint não é acessível para sua Role. Use o endpoint de busca filtrada (/branches/company/{companyId}).");
+        throw new UnauthorizedAccessException(
+                "Este endpoint não é acessível para sua Role. Use o endpoint de busca filtrada (/branches/company/{companyCnpj}).");
     }
 
     @Transactional(readOnly = true)
-    public List<BranchResponseDTO> findBranchesByCompanyId(Long companyId) {
-        if (companyId == null) {
-            throw new ValidationException("O ID da Empresa é obrigatório para esta busca.");
-        }
-
-        return branchRepository.findByCompanyId(companyId).stream()
+    public List<BranchResponseDTO> findBranchesByCompanyCnpj(String cnpj) {
+        validateInternalScopeAndGetBranch(cnpj, "listar");
+        return branchRepository.findByCompanyCnpj(cnpj).stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -173,14 +158,23 @@ public class BranchService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<BranchMasterDTO> findByCompanyNameMaster(String companyName) {
+        return branchRepository.findByCompanyNameContainingIgnoreCase(companyName).stream()
+                .map(b -> new BranchMasterDTO(
+                        b.getName(),
+                        b.getAddress(),
+                        b.getCode(),
+                        b.getCompany().getName()))
+                .collect(Collectors.toList());
+    }
+
     private BranchResponseDTO toResponseDTO(Branch branch) {
         return new BranchResponseDTO(
-                branch.getId(),
                 branch.getName(),
                 branch.getAddress(),
                 branch.getCode(),
-                branch.getCompany().getId(),
-                branch.getCompany().getName()
-        );
+                branch.getCompany().getCnpj(),
+                branch.getCompany().getName());
     }
 }

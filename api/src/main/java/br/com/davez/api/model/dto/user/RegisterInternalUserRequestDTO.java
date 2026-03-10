@@ -15,7 +15,7 @@ public record RegisterInternalUserRequestDTO(
 
         @Schema(description = "Papel/Permissão no sistema", example = "ADMIN") @NotNull(message = "O papel (Role) é obrigatório.") Role role,
 
-        @Schema(description = "ID da Filial de alocação", example = "1") @NotNull(message = "O ID da filial é obrigatório.") Long branchId,
+        @Schema(description = "Código da Filial de alocação", example = "SP-001") @NotBlank(message = "O código da filial é obrigatório.") String branchCode,
 
-        @Schema(description = "ID da Empresa", example = "1") @NotNull(message = "O ID da empresa é obrigatório.") Long companyId) {
+        @Schema(description = "CNPJ da Empresa", example = "12345678000199") @NotBlank(message = "O CNPJ da empresa é obrigatório.") String companyCnpj) {
 }

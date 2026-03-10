@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/useAuth';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -22,6 +22,7 @@ import OperatorDriverSearch from '../search/OperatorDriverSearch';
 import OperatorCreateAppointment from '../appointments/OperatorCreateAppointment';
 import OperatorRegisterEmployee from '../employees/OperatorRegisterEmployee';
 import OperatorProfile from '../profile/OperatorProfile';
+import operatorService, { type OperatorDashboardStats } from '../../../services/operatorService';
 
 type Page = 'inicio' | 'embarque' | 'desembarque' | 'atendimentos' | 'relatorios' | 'buscar' | 'cadastrar_agendamento' | 'cadastrar_funcionario' | 'perfil';
 
@@ -87,19 +88,42 @@ export default function OperatorDashboard() {
 }
 
 function DashboardHome() {
+    const { user } = useAuth();
+    const [stats, setStats] = useState<OperatorDashboardStats>({
+        totalQueue: 0,
+        inService: 0,
+        completedToday: 0,
+        canceledToday: 0
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadStats() {
+            try {
+                const data = await operatorService.getDashboardStats();
+                setStats(data);
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadStats();
+    }, []);
+
     return (
         <div className="space-y-10 animate-in fade-in duration-500">
             {/* Header Local (SPA style) */}
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                 <div>
-                    <h2 className="text-3xl font-black text-white tracking-tight">Olá, Operador.</h2>
+                    <h2 className="text-3xl font-black text-white tracking-tight">Olá, {user?.name?.split(' ')[0] || 'Operador'}.</h2>
                     <p className="text-slate-400 font-medium">Bem-vindo ao Painel DaVez.</p>
                 </div>
 
                 <div className="flex items-center gap-4 bg-white/5 p-4 rounded-full border border-white/5">
                     <div>
-                        <p className="text-sm font-bold text-white leading-none mb-1">Ricardo Silva</p>
-                        <p className="text-[10px] font-black text-primary/50 uppercase tracking-widest">Operador Sênior</p>
+                        <p className="text-sm font-bold text-white leading-none mb-1">{user?.name || 'Operador'}</p>
+                        <p className="text-[10px] font-black text-primary/50 uppercase tracking-widest">Operador</p>
                     </div>
                 </div>
             </header>
@@ -107,8 +131,8 @@ function DashboardHome() {
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <StatCard
-                    label="Agendados"
-                    value="142"
+                    label="Na Fila"
+                    value={loading ? "..." : stats.totalQueue.toString()}
                     icon={<Calendar size={24} />}
                     colorClass="text-blue-400"
                     glowClass="shadow-blue-500/20"
@@ -117,7 +141,7 @@ function DashboardHome() {
                 />
                 <StatCard
                     label="Em Atendimento"
-                    value="28"
+                    value={loading ? "..." : stats.inService.toString()}
                     icon={<Clock size={24} />}
                     colorClass="text-amber-400"
                     glowClass="shadow-amber-500/20"
@@ -125,8 +149,8 @@ function DashboardHome() {
                     bgIcon="bg-amber-500/10"
                 />
                 <StatCard
-                    label="Concluídos"
-                    value="850"
+                    label="Concluídos Hoje"
+                    value={loading ? "..." : stats.completedToday.toString()}
                     icon={<TrendingUp size={24} />}
                     colorClass="text-primary"
                     glowClass="shadow-primary/20"
@@ -137,3 +161,4 @@ function DashboardHome() {
         </div>
     );
 }
+

@@ -2,6 +2,7 @@ package br.com.davez.api.service;
 
 import br.com.davez.api.model.dto.company.CompanyRequestDTO;
 import br.com.davez.api.model.dto.company.CompanyResponseDTO;
+import br.com.davez.api.model.dto.master.CompanyMasterDTO;
 import br.com.davez.api.exceptions.ResourceNotFoundException;
 import br.com.davez.api.exceptions.ValidationException;
 import br.com.davez.api.model.entity.Company;
@@ -39,18 +40,17 @@ public class CompanyService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (!companyRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Company", "id", id);
-        }
-        companyRepository.deleteById(id);
-        log.info("Empresa ID [{}] removida com sucesso.", id);
+    public void delete(String cnpj) {
+        Company company = companyRepository.findByCnpj(cnpj)
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "cnpj", cnpj));
+        companyRepository.delete(company);
+        log.info("Empresa CNPJ [{}] removida com sucesso.", cnpj);
     }
 
     @Transactional
-    public CompanyResponseDTO update(Long id, CompanyRequestDTO dto) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", id));
+    public CompanyResponseDTO update(String cnpj, CompanyRequestDTO dto) {
+        Company company = companyRepository.findByCnpj(cnpj)
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "cnpj", cnpj));
 
         if (!company.getCnpj().equals(dto.cnpj()) && companyRepository.existsByCnpj(dto.cnpj())) {
             throw new ValidationException("O novo CNPJ " + dto.cnpj() + " já está em uso.");
@@ -64,9 +64,9 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public CompanyResponseDTO findById(Long id) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", id));
+    public CompanyResponseDTO findByCnpj(String cnpj) {
+        Company company = companyRepository.findByCnpj(cnpj)
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "cnpj", cnpj));
         return toResponseDTO(company);
     }
 
@@ -77,11 +77,16 @@ public class CompanyService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<CompanyMasterDTO> findAllMaster() {
+        return companyRepository.findAll().stream()
+                .map(c -> new CompanyMasterDTO(c.getName(), c.getCnpj()))
+                .collect(Collectors.toList());
+    }
+
     private CompanyResponseDTO toResponseDTO(Company company) {
         return new CompanyResponseDTO(
-                company.getId(),
                 company.getName(),
-                company.getCnpj()
-        );
+                company.getCnpj());
     }
 }

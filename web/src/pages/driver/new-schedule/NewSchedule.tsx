@@ -1,92 +1,119 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Truck, ArrowRight } from 'lucide-react';
+import { Truck, ArrowRight, Loader2 } from 'lucide-react';
 import DriverHeader from '../../../components/layout/DriverHeader';
 import DriverFooter from '../../../components/layout/DriverFooter';
 import { formatPlate } from '../../../utils/masks';
-import { GrainType, GrainTypeLabels, TruckType, TruckTypeLabels } from '../../../types';
-
-// Dados mockados
-const COMPANIES = [
-    { id: '1', name: 'AgroSul S/A' },
-    { id: '2', name: 'Fazenda Rio Verde' },
-    { id: '3', name: 'Cooperativa Grão de Ouro' },
-];
-
-const BRANCHES: Record<string, { id: string, name: string }[]> = {
-    '1': [
-        { id: '101', name: 'Filial Matriz - Cascavel' },
-        { id: '102', name: 'Unidade de Recebimento - Toledo' },
-    ],
-    '2': [
-        { id: '201', name: 'Armazém 01 - Maringá' },
-        { id: '202', name: 'Porto Seco - Londrina' },
-    ],
-    '3': [
-        { id: '301', name: 'Silo Central' },
-    ]
-};
-
-const TRUCK_TYPES = Object.values(TruckType).map(value => ({
-    label: TruckTypeLabels[value],
-    value
-}));
-
-const GRAIN_TYPES = Object.values(GrainType).map(value => ({
-    label: GrainTypeLabels[value],
-    value
-}));
-
-const CARRIERS = [
-    { label: 'Autônomo', value: 'AUTONOMO' },
-    { label: 'TransLogística Brasil', value: 'TRANS_LOG' },
-    { label: 'Expresso Grãos', value: 'EXPRESSO_GRAO' },
-    { label: 'Rápido Rodoviário', value: 'RAPIDO_RODO' },
-];
+import { GRAIN_TYPES, TRUCK_TYPES } from '../../../types';
+import masterDataService from '../../../services/masterDataService';
+import type { CompanyMaster, BranchMaster, CarrierMaster } from '../../../services/masterDataService';
+import schedulingService from '../../../services/schedulingService';
 
 export default function NewSchedule() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        companyId: '',
-        branchId: '',
+        companyCnpj: '',
+        branchCode: '',
         licensePlate: '',
         truckType: '',
         grainType: '',
-        carrierId: '',
+        carrierCnpj: '',
     });
+
+    const [companies, setCompanies] = useState<CompanyMaster[]>([]);
+    const [branches, setBranches] = useState<BranchMaster[]>([]);
+    const [carriers, setCarriers] = useState<CarrierMaster[]>([]);
+    
+    const [isFetchingCompanies, setIsFetchingCompanies] = useState(false);
+    const [isFetchingBranches, setIsFetchingBranches] = useState(false);
+    const [isFetchingCarriers, setIsFetchingCarriers] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Reseta Filial quando Empresa muda
+    // Carregar Empresas e Transportadoras no mount
     useEffect(() => {
-        setFormData(prev => ({ ...prev, branchId: '' }));
-    }, [formData.companyId]);
+        const loadInitialData = async () => {
+            setIsFetchingCompanies(true);
+            setIsFetchingCarriers(true);
+            try {
+                const [companiesData, carriersData] = await Promise.all([
+                    masterDataService.getCompanies(),
+                    masterDataService.getCarriers()
+                ]);
+                setCompanies(companiesData);
+                setCarriers(carriersData);
+            } catch (error) {
+                console.error("Erro ao carregar dados iniciais:", error);
+            } finally {
+                setIsFetchingCompanies(false);
+                setIsFetchingCarriers(false);
+            }
+        };
+        loadInitialData();
+    }, []);
+
+    // Carregar Filiais quando Empresa muda
+    useEffect(() => {
+        setFormData(prev => ({ ...prev, branchCode: '' }));
+        setBranches([]);
+
+        if (!formData.companyCnpj) return;
+
+        const selectedCompany = companies.find(c => c.cnpj === formData.companyCnpj);
+        if (!selectedCompany) return;
+
+        const loadBranches = async () => {
+            setIsFetchingBranches(true);
+            try {
+                const data = await masterDataService.getBranchesByCompany(selectedCompany.name);
+                setBranches(data);
+            } catch (error) {
+                console.error("Erro ao carregar filiais:", error);
+            } finally {
+                setIsFetchingBranches(false);
+            }
+        };
+        loadBranches();
+    }, [formData.companyCnpj, companies]);
 
     const handlePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formatted = formatPlate(e.target.value);
         setFormData({ ...formData, licensePlate: formatted });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulação de delay de envio
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            // TODO: Ajustar ScheduleRequestDTO no backend para aceitar campos únicos
+            // Por enquanto, enviamos o que temos
+            await schedulingService.create({
+                plate: formData.licensePlate,
+                branchCode: formData.branchCode, // Precisaremos ajustar o DTO no backend
+                grainType: formData.grainType,
+                truckType: formData.truckType,
+                companyCnpj: formData.companyCnpj,
+                carrierCnpj: formData.carrierCnpj,
+            } as any);
+
             navigate('/driver/active');
-        }, 1500);
+        } catch (error) {
+            console.error("Erro ao realizar agendamento:", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const isFormValid =
-        formData.companyId &&
-        formData.branchId &&
+        formData.companyCnpj &&
+        formData.branchCode &&
         formData.licensePlate.length === 8 &&
         formData.truckType &&
         formData.grainType &&
-        formData.carrierId;
+        formData.carrierCnpj;
 
     const labelClass = "block text-sm font-semibold text-primary uppercase tracking-wide ml-1 mb-2";
-    const selectClass = "w-full bg-forest text-slate-100 border border-emerald/50 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-slate-500 shadow-sm appearance-none cursor-pointer";
+    const selectClass = "w-full bg-forest text-slate-100 border border-emerald/50 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder-slate-500 shadow-sm appearance-none cursor-pointer disabled:opacity-50";
 
     return (
         <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
@@ -109,18 +136,21 @@ export default function NewSchedule() {
                             <div className="relative">
                                 <select
                                     className={selectClass}
-                                    value={formData.companyId}
-                                    onChange={e => setFormData({ ...formData, companyId: e.target.value })}
+                                    value={formData.companyCnpj}
+                                    onChange={e => setFormData({ ...formData, companyCnpj: e.target.value })}
+                                    disabled={isFetchingCompanies}
                                 >
-                                    <option value="" disabled className="bg-forest text-slate-100 italic">Selecione a empresa</option>
-                                    {COMPANIES.map(c => (
-                                        <option key={c.id} value={c.id} className="bg-forest text-slate-100 italic">
+                                    <option value="" disabled className="bg-forest text-slate-100 italic">
+                                        {isFetchingCompanies ? "Carregando..." : "Selecione a empresa"}
+                                    </option>
+                                    {companies.map(c => (
+                                        <option key={c.cnpj} value={c.cnpj} className="bg-forest text-slate-100">
                                             {c.name}
                                         </option>
                                     ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
-                                    <ArrowRight size={18} className="rotate-90" />
+                                    {isFetchingCompanies ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} className="rotate-90" />}
                                 </div>
                             </div>
                         </div>
@@ -129,22 +159,22 @@ export default function NewSchedule() {
                             <label className={labelClass}>Filial</label>
                             <div className="relative">
                                 <select
-                                    className={`${selectClass} ${!formData.companyId ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    value={formData.branchId}
-                                    onChange={e => setFormData({ ...formData, branchId: e.target.value })}
-                                    disabled={!formData.companyId}
+                                    className={selectClass}
+                                    value={formData.branchCode}
+                                    onChange={e => setFormData({ ...formData, branchCode: e.target.value })}
+                                    disabled={!formData.companyCnpj || isFetchingBranches}
                                 >
                                     <option value="" disabled className="bg-forest text-slate-100 italic">
-                                        {formData.companyId ? "Selecione a unidade" : "Selecione a empresa primeiro"}
+                                        {isFetchingBranches ? "Carregando..." : formData.companyCnpj ? "Selecione a unidade" : "Selecione a empresa primeiro"}
                                     </option>
-                                    {(BRANCHES[formData.companyId] || []).map(b => (
-                                        <option key={b.id} value={b.id} className="bg-forest text-slate-100">
+                                    {branches.map(b => (
+                                        <option key={b.branchCode} value={b.branchCode} className="bg-forest text-slate-100">
                                             {b.name}
                                         </option>
                                     ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
-                                    <ArrowRight size={18} className="rotate-90" />
+                                    {isFetchingBranches ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} className="rotate-90" />}
                                 </div>
                             </div>
                         </div>
@@ -180,7 +210,7 @@ export default function NewSchedule() {
                                 >
                                     <option value="" disabled className="bg-forest text-slate-100 italic">Selecione o tipo</option>
                                     {TRUCK_TYPES.map(t => (
-                                        <option key={t.value} value={t.value} className="bg-forest text-slate-100">
+                                        <option key={t.code} value={t.code} className="bg-forest text-slate-100">
                                             {t.label}
                                         </option>
                                     ))}
@@ -206,7 +236,7 @@ export default function NewSchedule() {
                                 >
                                     <option value="" disabled className="bg-forest text-slate-100 italic">Selecione o grão</option>
                                     {GRAIN_TYPES.map(g => (
-                                        <option key={g.value} value={g.value} className="bg-forest text-slate-100">
+                                        <option key={g.code} value={g.code} className="bg-forest text-slate-100">
                                             {g.label}
                                         </option>
                                     ))}
@@ -222,18 +252,21 @@ export default function NewSchedule() {
                             <div className="relative">
                                 <select
                                     className={selectClass}
-                                    value={formData.carrierId}
-                                    onChange={e => setFormData({ ...formData, carrierId: e.target.value })}
+                                    value={formData.carrierCnpj}
+                                    onChange={e => setFormData({ ...formData, carrierCnpj: e.target.value })}
+                                    disabled={isFetchingCarriers}
                                 >
-                                    <option value="" disabled className="bg-forest text-slate-100 italic">Selecione a empresa</option>
-                                    {CARRIERS.map(c => (
-                                        <option key={c.value} value={c.value} className="bg-forest text-slate-100">
-                                            {c.label}
+                                    <option value="" disabled className="bg-forest text-slate-100 italic">
+                                        {isFetchingCarriers ? "Carregando..." : "Selecione a empresa"}
+                                    </option>
+                                    {carriers.map(c => (
+                                        <option key={c.cnpj} value={c.cnpj} className="bg-forest text-slate-100">
+                                            {c.name}
                                         </option>
                                     ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-primary/50">
-                                    <ArrowRight size={18} className="rotate-90" />
+                                    {isFetchingCarriers ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} className="rotate-90" />}
                                 </div>
                             </div>
                         </div>

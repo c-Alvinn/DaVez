@@ -4,8 +4,6 @@ import br.com.davez.api.model.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record UserResponseDTO(
-                @Schema(description = "ID do usuário", example = "1") Long id,
-
                 @Schema(description = "Nome completo", example = "Admin Principal") String name,
 
                 @Schema(description = "Username", example = "admin") String username,
@@ -16,15 +14,15 @@ public record UserResponseDTO(
 
                 @Schema(description = "Permissão de acesso", example = "ADMIN") Role role,
 
-                @Schema(description = "ID da empresa vinculada", example = "1") Long companyId,
+                @Schema(description = "CNPJ da empresa vinculada", example = "12345678000199") String companyCnpj,
 
                 @Schema(description = "Nome da empresa", example = "AgroFarm S.A.") String companyName,
 
-                @Schema(description = "ID da filial vinculada", example = "2") Long branchId,
+                @Schema(description = "Código da filial vinculada", example = "SP-001") String branchCode,
 
                 @Schema(description = "Nome da filial", example = "Unidade Sorriso") String branchName,
 
-                @Schema(description = "ID da transportadora (se aplicável)", example = "5") Long carrierId,
+                @Schema(description = "CNPJ da transportadora (se aplicável)", example = "12345678000199") String carrierCnpj,
 
                 @Schema(description = "Nome da transportadora", example = "TransLogística") String carrierName) {
 }

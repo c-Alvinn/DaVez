@@ -2,7 +2,6 @@ package br.com.davez.api.model.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record RegisterCarrierUserRequestDTO(
 
@@ -12,5 +11,5 @@ public record RegisterCarrierUserRequestDTO(
 
                 @Schema(description = "Senha de acesso", example = "SenhaForte123!") @NotBlank(message = "A senha é obrigatória.") String password,
 
-                @Schema(description = "ID da Transportadora vinculada", example = "10") @NotNull(message = "O ID da Transportadora é obrigatório.") Long carrierId) {
+                @Schema(description = "CNPJ da Transportadora vinculada", example = "12345678000199") @NotBlank(message = "O CNPJ da Transportadora é obrigatório.") String carrierCnpj) {
 }

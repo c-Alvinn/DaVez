@@ -52,16 +52,16 @@ public class ScheduleService {
 
         Branch branch = switch (userRole) {
             case MANAGER, SCALE_OPERATOR, GATE_KEEPER -> validateInternalScopeAndGetBranch(loggedUser, dto);
-            default -> getBranch(dto.branchId());
+            default -> getBranch(dto.branchCode());
         };
 
         Carrier carrier = null;
         if (userRole == Role.CARRIER) {
             carrier = loggedUser.getCarrier();
         } else {
-            Long carrierId = dto.carrierId() != null ? dto.carrierId()
-                    : (driver.getCarrier() != null ? driver.getCarrier().getId() : null);
-            carrier = (carrierId != null) ? getCarrier(carrierId) : null;
+            String carrierCnpj = dto.carrierCnpj() != null ? dto.carrierCnpj()
+                    : (driver.getCarrier() != null ? driver.getCarrier().getCnpj() : null);
+            carrier = (carrierCnpj != null) ? getCarrierByCnpj(carrierCnpj) : null;
         }
 
         Schedule schedule = mapToSchedule(dto, branch, driver, carrier);
@@ -90,7 +90,7 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findFirstByDriver_IdAndQueueStatusIn(
                 loggedUser.getId(),
                 List.of(QueueStatus.SCHEDULED, QueueStatus.IN_SERVICE))
-                .orElseThrow(() -> new ResourceNotFoundException("Agendamento ativo", "motorista", loggedUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Agendamento ativo", "motorista", loggedUser.getUsername()));
 
         return toResponseDTO(schedule);
     }
@@ -122,12 +122,12 @@ public class ScheduleService {
 
             if (loggedUser.getCompany() == null)
                 return List.of();
-            schedules = scheduleRepository.findByBranch_Company_Id(loggedUser.getCompany().getId());
+            schedules = scheduleRepository.findByBranch_Company_Cnpj(loggedUser.getCompany().getCnpj());
 
         } else if (loggedUser.getRole() == Role.CARRIER) {
             if (loggedUser.getCarrier() == null)
                 return List.of();
-            schedules = scheduleRepository.findByCarrierId(loggedUser.getCarrier().getId());
+            schedules = scheduleRepository.findByCarrierCnpj(loggedUser.getCarrier().getCnpj());
 
         } else if (loggedUser.getRole() == Role.DRIVER) {
             schedules = scheduleRepository.findByDriverId(loggedUser.getId());
@@ -142,13 +142,12 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public ScheduleResponseDTO findById(Long id) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Schedule", "id", id));
+    public ScheduleResponseDTO findByTicketCode(String ticketCode) {
+        Schedule schedule = scheduleRepository.findByTicketCode(ticketCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Schedule", "ticketCode", ticketCode));
 
         User loggedUser = securityUtils.getLoggedUser();
         Role userRole = loggedUser.getRole();
-        Long loggedUserId = loggedUser.getId();
 
         if (userRole != Role.ADMIN) {
 
@@ -156,16 +155,16 @@ public class ScheduleService {
 
             if ((userRole == Role.MANAGER || userRole == Role.SCALE_OPERATOR || userRole == Role.GATE_KEEPER)
                     && loggedUser.getCompany() != null) {
-                if (schedule.getBranch().getCompany().getId().equals(loggedUser.getCompany().getId())) {
+                if (schedule.getBranch().getCompany().getCnpj().equals(loggedUser.getCompany().getCnpj())) {
                     allowed = true;
                 }
             } else if (userRole == Role.CARRIER && loggedUser.getCarrier() != null) {
                 if (schedule.getCarrier() != null
-                        && schedule.getCarrier().getId().equals(loggedUser.getCarrier().getId())) {
+                        && schedule.getCarrier().getCnpj().equals(loggedUser.getCarrier().getCnpj())) {
                     allowed = true;
                 }
             } else if (userRole == Role.DRIVER) {
-                if (schedule.getDriver().getId().equals(loggedUserId)) {
+                if (schedule.getDriver().getId().equals(loggedUser.getId())) {
                     allowed = true;
                 }
             }
@@ -251,7 +250,7 @@ public class ScheduleService {
         if (loggedUser.getBranch() != null) {
             schedules = scheduleRepository.findByBranchId(loggedUser.getBranch().getId());
         } else if (loggedUser.getCompany() != null) {
-            schedules = scheduleRepository.findByBranch_Company_Id(loggedUser.getCompany().getId());
+            schedules = scheduleRepository.findByBranch_Company_Cnpj(loggedUser.getCompany().getCnpj());
         } else {
             return Map.of("waiting", 0, "inService", 0, "completedToday", 0);
         }
@@ -276,8 +275,8 @@ public class ScheduleService {
         if (loggedUser.getCarrier() == null)
             return Map.of();
 
-        Long carrierId = loggedUser.getCarrier().getId();
-        List<Schedule> carrierSchedules = scheduleRepository.findByCarrierId(carrierId);
+        String carrierCnpj = loggedUser.getCarrier().getCnpj();
+        List<Schedule> carrierSchedules = scheduleRepository.findByCarrierCnpj(carrierCnpj);
 
         long active = carrierSchedules.stream().filter(
                 s -> s.getQueueStatus() == QueueStatus.SCHEDULED || s.getQueueStatus() == QueueStatus.IN_SERVICE)
@@ -293,8 +292,7 @@ public class ScheduleService {
     @Transactional
     public void notifyDriver(String ticketCode) {
         // Lógica de notificação (ex: WebSocket ou Push) seria implementada aqui.
-        // Por enquanto, apenas registramos a intenção ou alteramos um flag se
-        // necessário.
+        log.info("Notificando motorista do agendamento Ticket: [{}]", ticketCode);
     }
 
     @Transactional
@@ -342,7 +340,7 @@ public class ScheduleService {
         if (loggedUser.getRole() == Role.ADMIN)
             return;
         if (loggedUser.getCompany() != null
-                && schedule.getBranch().getCompany().getId().equals(loggedUser.getCompany().getId()))
+                && schedule.getBranch().getCompany().getCnpj().equals(loggedUser.getCompany().getCnpj()))
             return;
         throw new UnauthorizedAccessException("Você não tem permissão para operar este agendamento.");
     }
@@ -386,15 +384,15 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void deleteByTicketCode(String ticketCode) {
         User loggedUser = securityUtils.getLoggedUser();
 
         if (loggedUser.getRole() != Role.ADMIN) {
             throw new UnauthorizedAccessException("Somente usuários ADMIN podem excluir agendamentos permanentemente.");
         }
 
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Schedule", "id", id));
+        Schedule schedule = scheduleRepository.findByTicketCode(ticketCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Schedule", "ticketCode", ticketCode));
 
         if (schedule.getQueueStatus() == QueueStatus.SCHEDULED && schedule.getQueuePosition() != null) {
             scheduleRepository.reorderQueuePositions(schedule.getBranch().getId(), schedule.getQueuePosition());
@@ -434,7 +432,7 @@ public class ScheduleService {
 
         if (loggedUser.getRole() != Role.ADMIN) {
             if (loggedUser.getCompany() != null) {
-                if (!schedule.getBranch().getCompany().getId().equals(loggedUser.getCompany().getId())) {
+                if (!schedule.getBranch().getCompany().getCnpj().equals(loggedUser.getCompany().getCnpj())) {
                     throw new UnauthorizedAccessException(
                             "Você não tem permissão para operar agendamentos de outra empresa.");
                 }
@@ -448,13 +446,13 @@ public class ScheduleService {
         if (loggedUser.getCompany() == null) {
             throw new ValidationException("Usuário interno não vinculado a uma Empresa. Agendamento não permitido.");
         }
-        if (dto.branchId() == null)
-            throw new ValidationException("O ID da Filial é obrigatório.");
+        if (dto.branchCode() == null)
+            throw new ValidationException("O Código da Filial é obrigatório.");
 
-        Branch branch = branchRepository.findById(dto.branchId())
-                .orElseThrow(() -> new ResourceNotFoundException("Branch", "id", dto.branchId()));
+        Branch branch = branchRepository.findByCode(dto.branchCode())
+                    .orElseThrow(() -> new ResourceNotFoundException("Branch", "code", dto.branchCode()));
 
-        if (!branch.getCompany().getId().equals(loggedUser.getCompany().getId())) {
+        if (!branch.getCompany().getCnpj().equals(loggedUser.getCompany().getCnpj())) {
             throw new ValidationException(
                     String.format("%s não tem permissão para agendar em filiais fora da sua empresa (%s).",
                             loggedUser.getRole().name(), loggedUser.getCompany().getName()));
@@ -462,18 +460,17 @@ public class ScheduleService {
         return branch;
     }
 
-    private Branch getBranch(Long branchId) {
-        if (branchId == null)
-            throw new ValidationException("O ID da Filial é obrigatório.");
-        return branchRepository.findById(branchId)
-                .orElseThrow(() -> new ResourceNotFoundException("Branch", "id", branchId));
+    private Branch getBranch(String branchCode) {
+        if (branchCode == null)
+            throw new ValidationException("O Código da Filial é obrigatório.");
+        
+        return branchRepository.findByCode(branchCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch", "code", branchCode));
     }
 
-    private Carrier getCarrier(Long carrierId) {
-        if (carrierId == null)
-            throw new ValidationException("O ID da Transportadora é obrigatório.");
-        return carrierRepository.findById(carrierId)
-                .orElseThrow(() -> new ResourceNotFoundException("Carrier", "id", carrierId));
+    private Carrier getCarrierByCnpj(String cnpj) {
+        return carrierRepository.findByCnpj(cnpj)
+                .orElseThrow(() -> new ResourceNotFoundException("Carrier", "cnpj", cnpj));
     }
 
     private Schedule mapToSchedule(ScheduleRequestDTO dto, Branch branch, User driver, Carrier carrier) {
@@ -521,12 +518,12 @@ public class ScheduleService {
 
     private ScheduleResponseDTO toResponseDTO(Schedule schedule) {
         return new ScheduleResponseDTO(
-                schedule.getId(),
-                schedule.getBranch().getId(),
+                schedule.getTicketCode(),
+                schedule.getBranch().getCode(),
                 schedule.getBranch().getName(),
-                schedule.getDriver().getId(),
+                schedule.getDriver().getCpf(),
                 schedule.getDriver().getName(),
-                schedule.getCarrier() != null ? schedule.getCarrier().getId() : null,
+                schedule.getCarrier() != null ? schedule.getCarrier().getCnpj() : null,
                 schedule.getCarrier() != null ? schedule.getCarrier().getName() : "Autônomo / Não Informado",
                 schedule.getGrainType(),
                 schedule.getOperationType(),
@@ -536,8 +533,7 @@ public class ScheduleService {
                 schedule.getQueuePosition(),
                 schedule.getCreatedAt(),
                 schedule.getCalledAt(),
-                schedule.getReleasedAt(),
-                schedule.getTicketCode());
+                schedule.getReleasedAt());
     }
 
     private void registerHistory(Schedule schedule, QueueStatus oldStatus, QueueStatus newStatus, User user) {

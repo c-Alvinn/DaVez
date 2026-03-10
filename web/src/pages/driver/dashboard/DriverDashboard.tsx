@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/useAuth';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -5,15 +6,35 @@ import {
     Search,
     History,
     User,
-    ShieldCheck
+    ShieldCheck,
+    Clock,
+    CheckCircle2
 } from 'lucide-react';
 import DriverHeader from '../../../components/layout/DriverHeader';
 import DriverFooter from '../../../components/layout/DriverFooter';
 import DriverDashboardImage from '../../../assets/driver-dashboard.avif';
+import driverService from '../../../services/driverService';
+import type { ScheduleResponseDTO } from '../../../services/schedulingService';
 
 export default function DriverDashboard() {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [activeAppointment, setActiveAppointment] = useState<ScheduleResponseDTO | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadActiveAppointment() {
+            try {
+                const data = await driverService.getActiveAppointment();
+                setActiveAppointment(data);
+            } catch (error) {
+                console.error('Erro ao carregar agendamento ativo:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadActiveAppointment();
+    }, []);
 
     const menuItems = [
         {
@@ -54,6 +75,33 @@ export default function DriverDashboard() {
                     </h2>
                     <div className="h-1.5 w-12 bg-primary rounded-full mt-2"></div>
                 </section>
+
+                {/* Active Appointment Status - New Section */}
+                {!loading && activeAppointment && (
+                    <section
+                        onClick={() => navigate('/driver/active')}
+                        className="bg-emerald-agro/10 border border-emerald-agro/20 p-5 rounded-2xl flex items-center justify-between gap-4 cursor-pointer hover:bg-emerald-agro/15 transition-all shadow-sm group"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="bg-emerald-agro/20 p-3 rounded-xl text-emerald-agro group-hover:scale-110 transition-transform">
+                                <Clock size={24} />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-sm">Agendamento Ativo</h4>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    Ticket: <span className="font-mono font-bold text-emerald-agro">{activeAppointment.ticketCode}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-agro mb-1">Status</span>
+                            <div className="flex items-center gap-1.5 bg-emerald-agro text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                <CheckCircle2 size={10} />
+                                {activeAppointment.status}
+                            </div>
+                        </div>
+                    </section>
+                )}
 
                 {/* Menu Grid */}
                 <section className="grid grid-cols-2 gap-4">
@@ -104,3 +152,4 @@ export default function DriverDashboard() {
         </div>
     );
 }
+

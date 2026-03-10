@@ -77,7 +77,7 @@ public class UserService {
                 throw new UnauthorizedAccessException("Usuário interno sem vínculo de empresa. Contate o suporte.");
             }
 
-            if (!loggedUser.getCompany().getId().equals(data.companyId())) {
+            if (!loggedUser.getCompany().getCnpj().equals(data.companyCnpj())) {
                 throw new ValidationException(
                         "Não é permitido cadastrar usuários fora do escopo da sua empresa. " +
                                 "Você está vinculado à empresa: " + loggedUser.getCompany().getName());
@@ -92,11 +92,11 @@ public class UserService {
             throw new ValidationException("O nome de usuário '" + data.username() + "' já está em uso.");
         }
 
-        Company company = companyRepository.findById(data.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", data.companyId()));
+        Company company = companyRepository.findByCnpj(data.companyCnpj())
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "cnpj", data.companyCnpj()));
 
-        Branch branch = branchRepository.findById(data.branchId())
-                .orElseThrow(() -> new ResourceNotFoundException("Branch", "id", data.branchId()));
+        Branch branch = branchRepository.findByCode(data.branchCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Branch", "code", data.branchCode()));
 
         User newUser = new User();
         newUser.setName(data.name());
@@ -121,7 +121,7 @@ public class UserService {
                         "Usuário sem permissão de Administrador Global ou sem vínculo com Transportadora.");
             }
 
-            if (!loggedUser.getCarrier().getId().equals(data.carrierId())) {
+            if (!loggedUser.getCarrier().getCnpj().equals(data.carrierCnpj())) {
                 throw new ValidationException(
                         "Não é permitido cadastrar usuários para outras transportadoras. " +
                                 "Você está vinculado à transportadora " + loggedUser.getCarrier().getName());
@@ -132,8 +132,8 @@ public class UserService {
             throw new ValidationException("O nome de usuário '" + data.username() + "' já está em uso.");
         }
 
-        Carrier carrier = carrierRepository.findById(data.carrierId())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrier", "id", data.carrierId()));
+        Carrier carrier = carrierRepository.findByCnpj(data.carrierCnpj())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrier", "cnpj", data.carrierCnpj()));
 
         User newUser = new User();
         newUser.setName(data.name());
@@ -171,17 +171,16 @@ public class UserService {
 
     private UserResponseDTO toResponseDTO(User user) {
         return new UserResponseDTO(
-                user.getId(),
                 user.getName(),
                 user.getUsername(),
                 user.getCpf(),
                 user.getPhoneNumber(),
                 user.getRole(),
-                user.getCompany() != null ? user.getCompany().getId() : null,
+                user.getCompany() != null ? user.getCompany().getCnpj() : null,
                 user.getCompany() != null ? user.getCompany().getName() : null,
-                user.getBranch() != null ? user.getBranch().getId() : null,
+                user.getBranch() != null ? user.getBranch().getCode() : null,
                 user.getBranch() != null ? user.getBranch().getName() : null,
-                user.getCarrier() != null ? user.getCarrier().getId() : null,
+                user.getCarrier() != null ? user.getCarrier().getCnpj() : null,
                 user.getCarrier() != null ? user.getCarrier().getName() : null
         );
     }

@@ -1,30 +1,26 @@
 package br.com.davez.api.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 import br.com.davez.api.model.dto.report.QueueStatusReportDTO;
 import br.com.davez.api.model.dto.schedule.ScheduleRequestDTO;
 import br.com.davez.api.model.dto.schedule.ScheduleResponseDTO;
-import br.com.davez.api.model.enums.ReportPeriod;
+import br.com.davez.api.model.dto.schedule.ScheduleTransitionDTO;
 import br.com.davez.api.service.ReportingService;
 import br.com.davez.api.service.ScheduleService;
-import jakarta.servlet.http.HttpServletResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/schedule")
-@Tag(name = "Agendamentos Gerais", description = "Gestão Global de Agendamentos e Relatórios")
+@RequestMapping("/scheduling")
+@Tag(name = "Agendamento", description = "Endpoints para gestão de agendamentos e filas")
 @SecurityRequirement(name = "bearer-key")
 public class SchedulingController {
 
@@ -36,40 +32,62 @@ public class SchedulingController {
         this.reportingService = reportingService;
     }
 
-    @Operation(summary = "Criar Agendamento", description = "Cria um novo agendamento para um motorista/veículo.")
+    @Operation(summary = "Criar Agendamento", description = "Cria um novo agendamento na fila.")
     @ApiResponse(responseCode = "201", description = "Agendamento criado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Dados inválidos")
     @PostMapping
     public ResponseEntity<ScheduleResponseDTO> create(@RequestBody @Valid ScheduleRequestDTO dto) {
-        ScheduleResponseDTO response = scheduleService.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(dto));
     }
 
-    @Operation(summary = "Listar Agendamentos", description = "Retorna todos os agendamentos conforme o escopo do usuário.")
-    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    @Operation(summary = "Listar Agendamentos", description = "Retorna agendamentos baseados no perfil logado.")
     @GetMapping
     public ResponseEntity<List<ScheduleResponseDTO>> findAll() {
-        List<ScheduleResponseDTO> response = scheduleService.findAll();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(scheduleService.findAll());
     }
 
-    @Operation(summary = "Relatório de Status da Fila", description = "Retorna o status atual da fila por filial.")
-    @ApiResponse(responseCode = "200", description = "Relatório gerado")
+    @Operation(summary = "Buscar Agendamento por Ticket", description = "Retorna detalhes de um agendamento específico.")
+    @GetMapping("/{ticketCode}")
+    public ResponseEntity<ScheduleResponseDTO> findByTicketCode(@PathVariable String ticketCode) {
+        return ResponseEntity.ok(scheduleService.findByTicketCode(ticketCode));
+    }
+
+    @Operation(summary = "Solicitar Atendimento", description = "Mover para IN_SERVICE baseada na placa e filial.")
+    @PostMapping("/call-next")
+    public ResponseEntity<Void> callNext(@RequestBody @Valid ScheduleTransitionDTO transition) {
+        scheduleService.moveToInService(transition);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Concluir Atendimento", description = "Mover para COMPLETED baseada na placa e filial.")
+    @PostMapping("/complete")
+    public ResponseEntity<Void> complete(@RequestBody @Valid ScheduleTransitionDTO transition) {
+        scheduleService.moveToCompleted(transition);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Cancelar Agendamento", description = "Mover para CANCELED baseada na placa e filial.")
+    @PostMapping("/cancel")
+    public ResponseEntity<Void> cancel(@RequestBody @Valid ScheduleTransitionDTO transition) {
+        scheduleService.cancel(transition);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Excluir Agendamento Permanentemente", description = "Remove do banco de dados (ADMIN apenas).")
+    @DeleteMapping("/{ticketCode}")
+    public ResponseEntity<Void> delete(@PathVariable String ticketCode) {
+        scheduleService.deleteByTicketCode(ticketCode);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Status da Fila (Dashboard)", description = "KPIs rápidos para o dashboard do operador.")
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<Map<String, Object>> getDashboardStats() {
+        return ResponseEntity.ok(scheduleService.getOperatorStats());
+    }
+
+    @Operation(summary = "Relatório de Status da Fila", description = "Dados consolidados da fila por filial.")
     @GetMapping("/reports/queue-status")
-    public ResponseEntity<QueueStatusReportDTO> getQueueStatusReport(@RequestParam Long branchId) {
-        return ResponseEntity.ok(reportingService.getQueueStatusByBranch(branchId));
-    }
-
-    @Operation(summary = "Exportar Relatório de Desempenho (PDF)", description = "Gera um PDF com o relatório de desempenho do período.")
-    @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso")
-    @GetMapping("/reports/performance/pdf")
-    public void exportToPdf(@RequestParam(defaultValue = "TODAY") ReportPeriod period,
-            HttpServletResponse response) throws Exception {
-
-        response.setContentType("application/pdf");
-        String dateStamp = LocalDate.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy"));
-        String fileName = String.format("relatorio_atendimentos_%s_%s.pdf", period.name(), dateStamp);
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        reportingService.generatePerformanceReport(period, response);
+    public ResponseEntity<QueueStatusReportDTO> getQueueStatusReport(@RequestParam String branchCode) {
+        return ResponseEntity.ok(reportingService.getQueueStatusReport(branchCode));
     }
 }

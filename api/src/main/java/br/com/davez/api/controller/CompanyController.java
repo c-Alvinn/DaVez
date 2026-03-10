@@ -37,21 +37,21 @@ public class CompanyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Excluir Empresa", description = "Remove uma empresa pelo ID.")
+    @Operation(summary = "Excluir Empresa", description = "Remove uma empresa pelo CNPJ.")
     @ApiResponse(responseCode = "204", description = "Empresa excluída com sucesso")
     @ApiResponse(responseCode = "404", description = "Empresa não encontrada")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        companyService.delete(id);
+    @DeleteMapping("/{cnpj}")
+    public ResponseEntity<Void> delete(@PathVariable String cnpj) {
+        companyService.delete(cnpj);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Atualizar Empresa", description = "Atualiza os dados de uma empresa existente.")
+    @Operation(summary = "Atualizar Empresa", description = "Atualiza os dados de uma empresa existente pelo CNPJ.")
     @ApiResponse(responseCode = "200", description = "Empresa atualizada com sucesso")
     @ApiResponse(responseCode = "404", description = "Empresa não encontrada")
-    @PutMapping("/{id}")
-    public ResponseEntity<CompanyResponseDTO> update(@PathVariable Long id, @RequestBody @Valid CompanyRequestDTO dto) {
-        CompanyResponseDTO response = companyService.update(id, dto);
+    @PutMapping("/{cnpj}")
+    public ResponseEntity<CompanyResponseDTO> update(@PathVariable String cnpj, @RequestBody @Valid CompanyRequestDTO dto) {
+        CompanyResponseDTO response = companyService.update(cnpj, dto);
         return ResponseEntity.ok(response);
     }
 
@@ -63,12 +63,12 @@ public class CompanyController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Buscar Empresa por ID", description = "Retorna os detalhes de uma empresa específica.")
+    @Operation(summary = "Buscar Empresa por CNPJ", description = "Retorna os detalhes de uma empresa específica.")
     @ApiResponse(responseCode = "200", description = "Empresa encontrada")
     @ApiResponse(responseCode = "404", description = "Empresa não encontrada")
-    @GetMapping("/{id}")
-    public ResponseEntity<CompanyResponseDTO> findById(@PathVariable Long id) {
-        CompanyResponseDTO response = companyService.findById(id);
+    @GetMapping("/{cnpj}")
+    public ResponseEntity<CompanyResponseDTO> findByCnpj(@PathVariable String cnpj) {
+        CompanyResponseDTO response = companyService.findByCnpj(cnpj);
         return ResponseEntity.ok(response);
     }
 }

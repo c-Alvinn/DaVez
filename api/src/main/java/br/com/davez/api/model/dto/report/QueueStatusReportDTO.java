@@ -1,7 +1,7 @@
 package br.com.davez.api.model.dto.report;
 
 public record QueueStatusReportDTO(
-        Long branchId,
+        String branchCode,
         String branchName,
         long scheduled,
         long inService,

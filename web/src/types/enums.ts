@@ -9,6 +9,11 @@ export const GrainTypeLabels: Record<GrainType, string> = {
     [GrainType.CORN]: 'Milho'
 };
 
+export const GRAIN_TYPES = Object.entries(GrainTypeLabels).map(([code, label]) => ({
+    code: code as GrainType,
+    label
+}));
+
 export const OperationType = {
     LOADING: 'LOADING',
     UNLOADING: 'UNLOADING'
@@ -65,3 +70,9 @@ export const TruckTypeLabels: Record<TruckType, string> = {
     [TruckType.BITREM]: 'Bitrem',
     [TruckType.RODOTREM]: 'Rodotrem'
 };
+
+export const TRUCK_TYPES = Object.entries(TruckTypeLabels).map(([code, label]) => ({
+    code: code as TruckType,
+    label
+}));
+

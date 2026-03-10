@@ -35,26 +35,26 @@ public class ReportingService {
     }
 
     @Transactional(readOnly = true)
-    public QueueStatusReportDTO getQueueStatusByBranch(Long branchId) {
+    public QueueStatusReportDTO getQueueStatusReport(String branchCode) {
         User loggedUser = securityUtils.getLoggedUser();
 
-        Branch branch = branchRepository.findById(branchId)
-                .orElseThrow(() -> new ResourceNotFoundException("Branch", "id", branchId));
+        Branch branch = branchRepository.findByCode(branchCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch", "code", branchCode));
 
         if (loggedUser.getRole() != Role.ADMIN) {
             if (loggedUser.getCompany() == null ||
-                    !branch.getCompany().getId().equals(loggedUser.getCompany().getId())) {
+                    !branch.getCompany().getCnpj().equals(loggedUser.getCompany().getCnpj())) {
                 throw new UnauthorizedAccessException("Você não tem permissão para visualizar relatórios desta filial.");
             }
         }
 
-        long scheduled = scheduleRepository.countByBranchIdAndQueueStatus(branchId, QueueStatus.SCHEDULED);
-        long inService = scheduleRepository.countByBranchIdAndQueueStatus(branchId, QueueStatus.IN_SERVICE);
-        long completed = scheduleRepository.countByBranchIdAndQueueStatus(branchId, QueueStatus.COMPLETED);
-        long canceled = scheduleRepository.countByBranchIdAndQueueStatus(branchId, QueueStatus.CANCELED);
+        long scheduled = scheduleRepository.countByBranchIdAndQueueStatus(branch.getId(), QueueStatus.SCHEDULED);
+        long inService = scheduleRepository.countByBranchIdAndQueueStatus(branch.getId(), QueueStatus.IN_SERVICE);
+        long completed = scheduleRepository.countByBranchIdAndQueueStatus(branch.getId(), QueueStatus.COMPLETED);
+        long canceled = scheduleRepository.countByBranchIdAndQueueStatus(branch.getId(), QueueStatus.CANCELED);
 
         return new QueueStatusReportDTO(
-                branch.getId(),
+                branch.getCode(),
                 branch.getName(),
                 scheduled,
                 inService,
@@ -73,6 +73,7 @@ public class ReportingService {
 
         List<QueueStatus> statuses = List.of(QueueStatus.IN_SERVICE, QueueStatus.COMPLETED);
 
+        // findReportData ainda usa ID interno para busca otimizada no banco, o que é aceitável internamente no Service.
         List<Schedule> data = scheduleRepository.findReportData(
                 loggedUser.getCompany().getId(),
                 statuses,

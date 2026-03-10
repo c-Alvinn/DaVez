@@ -16,5 +16,7 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 
     List<Branch> findByCompanyId(Long companyId);
 
+    List<Branch> findByCompanyCnpj(String cnpj);
+
     List<Branch> findByCompanyNameContainingIgnoreCase(String companyName);
 }

@@ -22,13 +22,6 @@ public class AuthService {
         this.tokenService = tokenService;
     }
 
-    /**
-     * Processa a autenticação do usuário.
-     * 
-     * @param data O DTO de requisição contendo o loginIdentifier (CPF ou Username)
-     *             e a senha.
-     * @return O JWT gerado.
-     */
     public LoginResponseDTO authenticate(LoginRequestDTO data) {
 
         var authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -45,27 +38,26 @@ public class AuthService {
 
     private UserResponseDTO mapUserToResponseDTO(User user) {
 
-        Long companyId = user.getCompany() != null ? user.getCompany().getId() : null;
+        String companyCnpj = user.getCompany() != null ? user.getCompany().getCnpj() : null;
         String companyName = user.getCompany() != null ? user.getCompany().getName() : null;
 
-        Long branchId = user.getBranch() != null ? user.getBranch().getId() : null;
+        String branchCode = user.getBranch() != null ? user.getBranch().getCode() : null;
         String branchName = user.getBranch() != null ? user.getBranch().getName() : null;
 
-        Long carrierId = user.getCarrier() != null ? user.getCarrier().getId() : null;
+        String carrierCnpj = user.getCarrier() != null ? user.getCarrier().getCnpj() : null;
         String carrierName = user.getCarrier() != null ? user.getCarrier().getName() : null;
 
         return new UserResponseDTO(
-                user.getId(),
                 user.getName(),
                 user.getUsername(),
                 user.getCpf(),
                 user.getPhoneNumber(),
                 user.getRole(),
-                companyId,
+                companyCnpj,
                 companyName,
-                branchId,
+                branchCode,
                 branchName,
-                carrierId,
+                carrierCnpj,
                 carrierName);
     }
 }
