@@ -23,6 +23,9 @@ public class Carrier extends BaseEntity {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
+    
+    @Column(name = "cnpj", nullable = false, unique = true)
+    private String cnpj;
 
     @OneToMany(mappedBy = "carrier")
     private List<User> drivers = new ArrayList<>();

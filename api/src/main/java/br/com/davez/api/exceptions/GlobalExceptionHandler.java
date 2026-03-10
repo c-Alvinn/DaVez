@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
             } else {
                 detailMessage = constraintException.getMessage();
             }
-        } else if (e instanceof DataIntegrityViolationException dataException) {
+        } else if (e instanceof DataIntegrityViolationException) {
             detailMessage = "Falha de integridade: Certifique-se de que todos os campos obrigatórios foram preenchidos corretamente.";
         }
 

@@ -6,6 +6,7 @@ import br.com.davez.api.exceptions.ResourceNotFoundException;
 import br.com.davez.api.exceptions.ValidationException;
 import br.com.davez.api.model.entity.Company;
 import br.com.davez.api.repository.CompanyRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
@@ -32,6 +34,7 @@ public class CompanyService {
         company.setCnpj(dto.cnpj());
 
         Company savedCompany = companyRepository.save(company);
+        log.info("Nova empresa cadastrada: [{}] (CNPJ: [{}])", savedCompany.getName(), savedCompany.getCnpj());
         return toResponseDTO(savedCompany);
     }
 
@@ -41,6 +44,7 @@ public class CompanyService {
             throw new ResourceNotFoundException("Company", "id", id);
         }
         companyRepository.deleteById(id);
+        log.info("Empresa ID [{}] removida com sucesso.", id);
     }
 
     @Transactional

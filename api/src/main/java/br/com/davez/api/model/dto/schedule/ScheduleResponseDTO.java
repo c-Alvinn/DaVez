@@ -29,5 +29,6 @@ public record ScheduleResponseDTO(
 
                 @Schema(description = "Data/Hora do Agendamento") LocalDateTime scheduledAt,
                 @Schema(description = "Data/Hora da Chamada") LocalDateTime calledAt,
-                @Schema(description = "Data/Hora da Liberação") LocalDateTime releasedAt) {
+                @Schema(description = "Data/Hora da Liberação") LocalDateTime releasedAt,
+                @Schema(description = "Código do Ticket", example = "DV-XYZ-1234") String ticketCode) {
 }

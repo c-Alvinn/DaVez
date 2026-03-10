@@ -32,7 +32,8 @@ CREATE TABLE carrier (
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP,
-    name VARCHAR(255) NOT NULL UNIQUE
+    name VARCHAR(255) NOT NULL UNIQUE,
+    cnpj VARCHAR(20) NOT NULL UNIQUE
 );
 
 -- 4. TABELA BRANCH
@@ -78,6 +79,7 @@ CREATE TABLE schedule (
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP,
     version BIGINT,
+    ticket_code VARCHAR(50) NOT NULL UNIQUE,
     branch_id BIGINT NOT NULL,
     driver_id BIGINT NOT NULL,
     carrier_id BIGINT,
@@ -106,6 +108,22 @@ CREATE TABLE schedule_history (
     CONSTRAINT fk_history_user FOREIGN KEY (changed_by_user_id) REFERENCES users(id)
 );
 
--- Índices adicionais para performance
-CREATE INDEX idx_schedule_branch_status ON schedule(branch_id, queue_status);
+-- 8. ÍNDICES ADICIONAIS PARA PERFORMANCE
+-- Chaves Estrangeiras (C.E.)
+CREATE INDEX idx_branch_company_id ON branch(company_id);
+CREATE INDEX idx_users_company_id ON users(company_id);
+CREATE INDEX idx_users_branch_id ON users(branch_id);
+CREATE INDEX idx_users_carrier_id ON users(carrier_id);
+CREATE INDEX idx_schedule_branch_id ON schedule(branch_id);
+CREATE INDEX idx_schedule_driver_id ON schedule(driver_id);
+CREATE INDEX idx_schedule_carrier_id ON schedule(carrier_id);
+CREATE INDEX idx_history_schedule_id ON schedule_history(schedule_id);
+CREATE INDEX idx_history_user_id ON schedule_history(changed_by_user_id);
+
+-- Campos de Busca Frequente
+CREATE INDEX idx_branch_code ON branch(code);
+CREATE INDEX idx_schedule_ticket_code ON schedule(ticket_code);
 CREATE INDEX idx_schedule_plate ON schedule(license_plate);
+CREATE INDEX idx_schedule_status ON schedule(queue_status);
+CREATE INDEX idx_schedule_branch_status ON schedule(branch_id, queue_status);
+CREATE INDEX idx_history_changed_at ON schedule_history(changed_at);

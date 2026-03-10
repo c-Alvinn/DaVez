@@ -50,6 +50,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByBranch_Company_Id(Long companyId);
     List<Schedule> findByCarrierId(Long carrierId);
     List<Schedule> findByDriverId(Long driverId);
+    List<Schedule> findByBranchId(Long branchId);
 
     @Query("SELECT s FROM schedule s WHERE s.branch.company.id = :companyId " +
             "AND s.queueStatus IN :statuses " +
@@ -70,4 +71,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
             @Param("plate") String plate,
             @Param("branchName") String branchName
     );
+
+    Optional<Schedule> findByTicketCode(String ticketCode);
+
+    List<Schedule> findAllByCreatedAtBefore(LocalDateTime dateTime);
 }

@@ -12,6 +12,7 @@ import br.com.davez.api.repository.BranchRepository;
 import br.com.davez.api.repository.CompanyRepository;
 import br.com.davez.api.utils.SecurityUtils;
 import br.com.davez.api.model.enums.Role;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BranchService {
 
     private final BranchRepository branchRepository;
@@ -76,7 +78,10 @@ public class BranchService {
         branch.setCode(dto.branchCode());
         branch.setCompany(company);
 
-        return toResponseDTO(branchRepository.save(branch));
+        Branch savedBranch = branchRepository.save(branch);
+        log.info("Nova filial cadastrada: [{}] (Código: [{}]) para a empresa [{}]", 
+                savedBranch.getName(), savedBranch.getCode(), savedBranch.getCompany().getName());
+        return toResponseDTO(savedBranch);
     }
 
     @Transactional
@@ -114,6 +119,7 @@ public class BranchService {
         validateInternalScope(branch.getCompany().getId());
 
         branchRepository.deleteById(id);
+        log.info("Filial ID [{}] removida com sucesso.", id);
     }
 
     @Transactional(readOnly = true)
@@ -156,6 +162,13 @@ public class BranchService {
         }
 
         return branchRepository.findByCompanyId(companyId).stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<BranchResponseDTO> findByCompanyName(String companyName) {
+        return branchRepository.findByCompanyNameContainingIgnoreCase(companyName).stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }

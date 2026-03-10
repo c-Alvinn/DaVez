@@ -6,6 +6,7 @@ import br.com.davez.api.exceptions.ValidationException;
 import br.com.davez.api.model.dto.user.RegisterCarrierUserRequestDTO;
 import br.com.davez.api.model.dto.user.RegisterDriverRequestDTO;
 import br.com.davez.api.model.dto.user.RegisterInternalUserRequestDTO;
+import br.com.davez.api.model.dto.user.UserResponseDTO;
 import br.com.davez.api.model.entity.Branch;
 import br.com.davez.api.model.entity.Carrier;
 import br.com.davez.api.model.entity.Company;
@@ -16,6 +17,7 @@ import br.com.davez.api.repository.CarrierRepository;
 import br.com.davez.api.repository.CompanyRepository;
 import br.com.davez.api.repository.UserRepository;
 import br.com.davez.api.utils.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -54,7 +57,6 @@ public class UserService {
         }
 
         User newDriver = new User();
-
         newDriver.setName(data.name());
         newDriver.setCpf(data.cpf());
         newDriver.setPhoneNumber(data.phoneNumber());
@@ -63,15 +65,14 @@ public class UserService {
         newDriver.setPassword(hashedPassword);
 
         userRepository.save(newDriver);
+        log.info("Novo motorista registrado com sucesso: CPF [{}]", data.cpf());
     }
 
     @Transactional
     public void registerInternalUser(RegisterInternalUserRequestDTO data) {
-
         User loggedUser = securityUtils.getLoggedUser();
 
         if (loggedUser.getRole() != Role.ADMIN) {
-
             if (loggedUser.getCompany() == null) {
                 throw new UnauthorizedAccessException("Usuário interno sem vínculo de empresa. Contate o suporte.");
             }
@@ -112,11 +113,9 @@ public class UserService {
 
     @Transactional
     public void registerCarrierUser(RegisterCarrierUserRequestDTO data) {
-
         User loggedUser = securityUtils.getLoggedUser();
 
         if (loggedUser.getRole() != Role.ADMIN) {
-
             if (loggedUser.getRole() != Role.CARRIER || loggedUser.getCarrier() == null) {
                 throw new UnauthorizedAccessException(
                         "Usuário sem permissão de Administrador Global ou sem vínculo com Transportadora.");
@@ -149,5 +148,41 @@ public class UserService {
         newUser.setPassword(hashedPassword);
 
         userRepository.save(newUser);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponseDTO getLoggedUserProfile() {
+        User loggedUser = securityUtils.getLoggedUser();
+        return toResponseDTO(loggedUser);
+    }
+
+    @Transactional
+    public void changePassword(String newPassword) {
+        User loggedUser = securityUtils.getLoggedUser();
+        loggedUser.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(loggedUser);
+    }
+
+    @Transactional(readOnly = true)
+    public User findByCpf(String cpf) {
+        return userRepository.findByCpf(cpf)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário", "cpf", cpf));
+    }
+
+    private UserResponseDTO toResponseDTO(User user) {
+        return new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getUsername(),
+                user.getCpf(),
+                user.getPhoneNumber(),
+                user.getRole(),
+                user.getCompany() != null ? user.getCompany().getId() : null,
+                user.getCompany() != null ? user.getCompany().getName() : null,
+                user.getBranch() != null ? user.getBranch().getId() : null,
+                user.getBranch() != null ? user.getBranch().getName() : null,
+                user.getCarrier() != null ? user.getCarrier().getId() : null,
+                user.getCarrier() != null ? user.getCarrier().getName() : null
+        );
     }
 }

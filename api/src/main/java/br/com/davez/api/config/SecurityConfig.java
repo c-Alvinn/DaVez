@@ -39,43 +39,39 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req -> {
                     // Endpoints públicos
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
-                    req.requestMatchers(HttpMethod.POST, "/user/driver/register").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/driver/register").permitAll();
                     req.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**")
                             .permitAll();
 
-                    // Endpoints de Agendamento
-                    req.requestMatchers(HttpMethod.GET, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
-                            "SCALE_OPERATOR", "GATE_KEEPER");
-                    req.requestMatchers(HttpMethod.POST, "/schedules").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
-                            "SCALE_OPERATOR", "GATE_KEEPER", "DRIVER");
-                    req.requestMatchers(HttpMethod.PUT, "/schedules/**").hasAnyRole("ADMIN", "MANAGER",
-                            "SCALE_OPERATOR", "GATE_KEEPER");
-                    req.requestMatchers(HttpMethod.DELETE, "/schedules/**").hasAnyRole("ADMIN", "MANAGER");
+                    // Autenticação
+                    req.requestMatchers(HttpMethod.POST, "/auth/logout").authenticated();
 
-                    // Endpoints de Usuário
-                    req.requestMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.PUT, "/users/**").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN");
+                    // Motorista (Driver)
+                    req.requestMatchers("/driver/**").hasRole("DRIVER");
 
-                    // Endpoints de Empresa
-                    req.requestMatchers(HttpMethod.GET, "/companies").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.POST, "/companies").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.PUT, "/companies/**").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.DELETE, "/companies/**").hasRole("ADMIN");
+                    // Operador (Operator)
+                    req.requestMatchers("/operator/**").hasAnyRole("GATE_KEEPER", "SCALE_OPERATOR", "ADMIN");
 
-                    // Endpoints de Transportadora
-                    req.requestMatchers(HttpMethod.GET, "/carriers").hasAnyRole("ADMIN", "MANAGER", "CARRIER");
-                    req.requestMatchers(HttpMethod.POST, "/carriers").hasAnyRole("ADMIN", "MANAGER");
-                    req.requestMatchers(HttpMethod.PUT, "/carriers/**").hasAnyRole("ADMIN", "MANAGER", "CARRIER");
-                    req.requestMatchers(HttpMethod.DELETE, "/carriers/**").hasRole("ADMIN");
+                    // Transportadora (Carrier)
+                    req.requestMatchers("/carrier/**").hasAnyRole("CARRIER", "ADMIN");
 
-                    // Endpoints de Filial
-                    req.requestMatchers(HttpMethod.GET, "/branches").hasAnyRole("ADMIN", "MANAGER", "CARRIER",
-                            "SCALE_OPERATOR", "GATE_KEEPER");
-                    req.requestMatchers(HttpMethod.POST, "/branches").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.PUT, "/branches/**").hasRole("ADMIN");
-                    req.requestMatchers(HttpMethod.DELETE, "/branches/**").hasRole("ADMIN");
+                    // Dados Mestres (Master Data)
+                    req.requestMatchers("/master-data/**").authenticated();
+
+                    // Agendamentos (Geral e Administrativo)
+                    req.requestMatchers(HttpMethod.GET, "/schedule/**").hasAnyRole("ADMIN", "MANAGER", "CARRIER", "SCALE_OPERATOR", "GATE_KEEPER");
+                    req.requestMatchers(HttpMethod.POST, "/schedule").hasAnyRole("ADMIN", "MANAGER", "CARRIER", "DRIVER");
+                    req.requestMatchers(HttpMethod.PATCH, "/schedule/**").hasAnyRole("ADMIN", "MANAGER", "SCALE_OPERATOR", "GATE_KEEPER");
+                    req.requestMatchers(HttpMethod.DELETE, "/schedule/**").hasRole("ADMIN");
+
+                    // Usuários e Gestão
+                    req.requestMatchers(HttpMethod.GET, "/user/profile").authenticated();
+                    req.requestMatchers(HttpMethod.PATCH, "/user/password").authenticated();
+                    req.requestMatchers("/user/**").hasAnyRole("ADMIN", "MANAGER");
+
+                    // Empresas e Filiais
+                    req.requestMatchers("/companies/**").hasAnyRole("ADMIN", "MANAGER");
+                    req.requestMatchers("/branches/**").hasAnyRole("ADMIN", "MANAGER");
 
                     // Qualquer outra requisição precisa estar autenticada
                     req.anyRequest().authenticated();
