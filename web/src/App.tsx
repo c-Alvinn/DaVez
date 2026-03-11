@@ -14,11 +14,13 @@ import EditProfile from './pages/driver/profile-edit/EditProfile';
 import OperatorDashboard from './pages/operator/dashboard/OperatorDashboard';
 import CarrierDashboard from './pages/carrier/dashboard/CarrierDashboard';
 import NotFound from './pages/error/NotFound';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Rotas Públicas */}
         <Route path="/" element={<Landing />} />
         <Route path="/sobre" element={<AboutUs />} />
         <Route path="/servicos" element={<Services />} />
@@ -26,19 +28,25 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register/driver" element={<DriverRegister />} />
 
-        {/* Rotas Motorista */}
-        <Route path="/driver" element={<DriverDashboard />} />
-        <Route path="/driver/shipment" element={<NewSchedule />} />
-        <Route path="/driver/active" element={<ActiveAppointment />} />
-        <Route path="/driver/history" element={<AppointmentHistory />} />
-        <Route path="/driver/profile" element={<Profile />} />
-        <Route path="/driver/profile/edit" element={<EditProfile />} />
+        {/* Rotas Privadas - Motorista */}
+        <Route element={<ProtectedRoute allowedRoles={['DRIVER', 'ADMIN']} />}>
+          <Route path="/driver" element={<DriverDashboard />} />
+          <Route path="/driver/shipment" element={<NewSchedule />} />
+          <Route path="/driver/active" element={<ActiveAppointment />} />
+          <Route path="/driver/history" element={<AppointmentHistory />} />
+          <Route path="/driver/profile" element={<Profile />} />
+          <Route path="/driver/profile/edit" element={<EditProfile />} />
+        </Route>
 
-        {/* Rotas Operador */}
-        <Route path="/dashboard" element={<OperatorDashboard />} />
+        {/* Rotas Privadas - Operador */}
+        <Route element={<ProtectedRoute allowedRoles={['SCALE_OPERATOR', 'GATE_KEEPER', 'MANAGER', 'ADMIN']} />}>
+          <Route path="/dashboard" element={<OperatorDashboard />} />
+        </Route>
 
-        {/* Rotas Transportadora */}
-        <Route path="/carrier" element={<CarrierDashboard />} />
+        {/* Rotas Privadas - Transportadora */}
+        <Route element={<ProtectedRoute allowedRoles={['CARRIER', 'ADMIN']} />}>
+          <Route path="/carrier" element={<CarrierDashboard />} />
+        </Route>
 
         {/* Catch-all 404 */}
         <Route path="*" element={<NotFound />} />

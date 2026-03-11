@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
-import { authService } from '../../../services/authService';
+import authService from '../../../services/authService';
 import { formatCPF } from '../../../utils/masks';
 import Button from '../../../components/common/Button';
 import Logo from '../../../components/common/Logo';
@@ -31,15 +31,22 @@ export default function Login() {
         const cleanUsername = role === 'DRIVER' ? username.replace(/\D/g, '') : username;
 
         try {
-            const user = await authService.login({
-                loginIdentifier: cleanUsername,
-                password: password,
-            });
+            const loginResponse = await authService.login(
+                cleanUsername,
+                password
+            );
 
-            login(user);
+            const userToStore: any = {
+                id: 0, // Mock id or get from another profile call if needed, but LoginResponseDTO has the data
+                name: loginResponse.user.name,
+                role: loginResponse.user.role,
+                token: loginResponse.token,
+            };
 
-            if (user.role === 'DRIVER') navigate('/driver');
-            else if (['SCALE_OPERATOR', 'GATE_KEEPER', 'MANAGER', 'ADMIN'].includes(user.role)) navigate('/dashboard');
+            login(userToStore);
+
+            if (userToStore.role === 'DRIVER') navigate('/driver');
+            else if (['SCALE_OPERATOR', 'GATE_KEEPER', 'MANAGER', 'ADMIN'].includes(userToStore.role)) navigate('/dashboard');
             else navigate('/');
         } catch (err: any) {
             console.error('Erro no login:', err);

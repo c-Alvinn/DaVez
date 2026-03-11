@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { isCPF } from 'brazilian-values';
 import Button from '../../../components/common/Button';
 import Logo from '../../../components/common/Logo';
-import { authService } from '../../../services/authService';
+import authService from '../../../services/authService';
 import { formatCPF, formatPhone } from '../../../utils/masks';
 import '../../auth/login/Login.css';
 

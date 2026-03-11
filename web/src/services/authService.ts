@@ -28,6 +28,10 @@ const authService = {
         return response.data;
     },
 
+    register: async (data: any): Promise<void> => {
+        await api.post('/auth/register', data);
+    },
+
     getProfile: async (): Promise<UserResponseDTO> => {
         const response = await api.get<UserResponseDTO>('/user/profile');
         return response.data;

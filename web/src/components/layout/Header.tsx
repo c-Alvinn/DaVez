@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../common/Logo';
+import { useAuth } from '../../context/useAuth';
 
 export default function Header() {
     const location = useLocation();
+    const { user, isAuthenticated } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
@@ -24,6 +26,20 @@ export default function Header() {
             }`;
     };
 
+    const getDashboardPath = () => {
+        if (!user) return '/login';
+        if (user.role === 'DRIVER') return '/driver';
+        if (['SCALE_OPERATOR', 'GATE_KEEPER', 'MANAGER', 'ADMIN'].includes(user.role)) return '/dashboard';
+        if (user.role === 'CARRIER') return '/carrier';
+        return '/';
+    };
+
+    const getBotaoLabel = () => {
+        if (!isAuthenticated()) return 'Área do Cliente';
+        if (user?.role === 'DRIVER') return 'Área do Motorista';
+        return 'Dashboard';
+    };
+
     return (
         <>
             <header className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-white/10">
@@ -39,9 +55,9 @@ export default function Header() {
                     </div>
 
                     {/* Action / Spacer Desktop */}
-                    <div className="hidden md:flex w-[180px] justify-end">
-                        <Link to="/login" className="bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary/20 transition-all cursor-pointer">
-                            Área do Cliente
+                    <div className="hidden md:flex min-w-[180px] justify-end">
+                        <Link to={getDashboardPath()} className="bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary/20 transition-all cursor-pointer whitespace-nowrap">
+                            {getBotaoLabel()}
                         </Link>
                     </div>
 
@@ -81,10 +97,10 @@ export default function Header() {
                     <Link className={mobileLinkClass('/contato')} to="/contato">Contato</Link>
                     <div className="mt-8">
                         <Link
-                            to="/login"
+                            to={getDashboardPath()}
                             className="flex items-center justify-center w-full bg-primary text-background-dark py-4 rounded-xl font-bold text-lg cursor-pointer hover:bg-primary/90 transition-all"
                         >
-                            Acessar Sistema
+                            {isAuthenticated() ? 'Acessar Painel' : 'Acessar Sistema'}
                         </Link>
                     </div>
                 </div>
