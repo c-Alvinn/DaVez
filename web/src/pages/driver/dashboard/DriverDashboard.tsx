@@ -97,7 +97,7 @@ export default function DriverDashboard() {
                             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-agro mb-1">Status</span>
                             <div className="flex items-center gap-1.5 bg-emerald-agro text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
                                 <CheckCircle2 size={10} />
-                                {activeAppointment.status}
+                                {activeAppointment.queueStatus}
                             </div>
                         </div>
                     </section>

@@ -1,5 +1,12 @@
 import { api } from './api';
 
+export interface OperatorDashboardStats {
+    totalQueue: number;
+    inService: number;
+    completedToday: number;
+    canceledToday: number;
+}
+
 const operatorService = {
     getDashboardStats: async () => {
         const response = await api.get('/operator/dashboard/stats');
